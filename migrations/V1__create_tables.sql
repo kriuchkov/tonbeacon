@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS accounts (
+    id UUID PRIMARY KEY,
+    wallet_id SERIAL UNIQUE NOT NULL,
+    ton_address VARCHAR(255) NULL,
+    is_closed BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS events (
+    id SERIAL PRIMARY KEY,
+    event_type VARCHAR(255) NOT NULL,
+    payload TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    processed BOOLEAN NOT NULL DEFAULT FALSE
+);

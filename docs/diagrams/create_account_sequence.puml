@@ -1,0 +1,85 @@
+@startuml CreateAccountSequence
+title Account Service - CreateAccount Function
+
+participant "Client" as client
+participant "Account Service" as service
+participant "Database" as db
+participant "Transaction Manager" as tx
+participant "Wallet Manager" as wallet
+participant "Event Manager" as event
+
+client -> service : CreateAccount(ctx, accountID)
+activate service
+
+service -> db : IsAccountExists(ctx, accountID)
+activate db
+db --> service : exists, err
+deactivate db
+
+alt account exists or error
+    service --> client : return nil, error
+    note right: Returns ErrAccountExists if account exists
+end
+
+service -> tx : Begin(ctx)
+activate tx
+tx --> service : ctx, err
+deactivate tx
+
+alt error
+    service --> client : return nil, error
+end
+
+note over service: defer tx.Rollback(ctx)
+
+service -> db : InsertAccount(ctx, accountID)
+activate db
+db --> service : account, err
+deactivate db
+
+alt error
+    service --> client : return nil, error
+end
+
+service -> wallet : CreateWallet(ctx, account.SubwalletID)
+activate wallet
+wallet --> service : wallet, err
+deactivate wallet
+
+alt error
+    service --> client : return nil, error
+end
+
+service -> service : account.Address = wallet.WalletAddress()
+
+service -> db : UpdateAccount(ctx, account)
+activate db
+db --> service : err
+deactivate db
+
+alt error
+    service --> client : return nil, error
+end
+
+service -> event : Publish(ctx, AccountCreated, account)
+activate event
+event --> service : err
+deactivate event
+
+alt error
+    service --> client : return nil, error
+end
+
+service -> tx : Commit(ctx)
+activate tx
+tx --> service : err
+deactivate tx
+
+alt error
+    service --> client : return nil, error
+end
+
+service --> client : return account, nil
+deactivate service
+
+@enduml
