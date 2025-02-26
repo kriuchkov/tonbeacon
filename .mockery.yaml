@@ -5,8 +5,10 @@ dir: "{{.InterfaceDir}}/mocks"
 mockname: "Mock{{.InterfaceName}}"
 outpkg: "{{.PackageName}}mocks"
 packages:
-  github.com/kriuchkov/tonbeacon/internal/core/ports:
+  github.com/kriuchkov/tonbeacon/core/ports:
     interfaces:
       WalletPort:
       DatabasePort:
+      DatabaseTransactionPort:
+      OutboxMessagePort:
       
