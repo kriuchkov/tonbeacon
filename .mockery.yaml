@@ -1,0 +1,12 @@
+
+with-expecter: true
+filename: "mock_{{.InterfaceName | lower }}.go"
+dir: "{{.InterfaceDir}}/mocks"
+mockname: "Mock{{.InterfaceName}}"
+outpkg: "{{.PackageName}}mocks"
+packages:
+  github.com/kriuchkov/tonbeacon/internal/core/ports:
+    interfaces:
+      WalletPort:
+      DatabasePort:
+      
