@@ -1,6 +1,10 @@
 # TonBeacon
 
+**Warning: The project is in the early development stage and should not be used in. The codebase is subject to change, and the documentation may be incomplete or outdated.**
+
 **TonBeacon** is a self-hosted B2B solution providing infrastructure for generating user wallets on the TON (The Open Network) blockchain, tracking incoming transactions, and automatically centralizing funds to a master wallet. The primary goal of the project is to make the TON blockchain accessible for financial solutions and extend beyond the Telegram ecosystem, enabling B2B applications to offer custodial wallets with account management and fund aggregation for their users without relying on memo phrases or compromising the master wallet.
+
+
 
 ## Project Goals
 
