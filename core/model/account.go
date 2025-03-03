@@ -7,3 +7,10 @@ type Account struct {
 	WalletID uint32
 	Address  Address
 }
+
+type ListAccountFilter struct {
+	WalletIDs *[]uint32
+	IsClosed  *bool
+	Offset    int
+	Limit     int
+}

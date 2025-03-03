@@ -8,6 +8,8 @@ import (
 
 type WalletPort interface {
 	CreateWallet(ctx context.Context, walletID uint32) (model.WalletWrapper, error)
+	GetExtraCurrenciesBalance(ctx context.Context, walletID uint32) ([]model.Balance, error)
+	GetBalance(ctx context.Context, walletID uint32) (uint64, error)
 }
 
 type AccountDatabasePort interface {
@@ -15,6 +17,7 @@ type AccountDatabasePort interface {
 	InsertAccount(ctx context.Context, accountID string) (*model.Account, error)
 	UpdateAccount(ctx context.Context, account *model.Account) error
 	CloseAccount(ctx context.Context, accountID string) error
+	ListAccounts(ctx context.Context, filter model.ListAccountFilter) ([]model.Account, error)
 }
 
 type OutboxMessageDatabasePort interface {
@@ -23,7 +26,13 @@ type OutboxMessageDatabasePort interface {
 	MarkEventAsProcessed(ctx context.Context, eventID uint64) error
 }
 
+type DatabaseWithinTransactionPort interface {
+	WithInTransaction(ctx context.Context, f func(ctx context.Context) error) error
+}
+
 type DatabaseTransactionPort interface {
+	DatabaseWithinTransactionPort
+
 	Begin(ctx context.Context) (context.Context, error)
 	Commit(ctx context.Context) error
 	Rollback(ctx context.Context) error

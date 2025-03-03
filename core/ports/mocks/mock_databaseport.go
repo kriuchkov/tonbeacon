@@ -244,6 +244,65 @@ func (_c *MockDatabasePort_IsAccountExists_Call) RunAndReturn(run func(context.C
 	return _c
 }
 
+// ListAccounts provides a mock function with given fields: ctx, filter
+func (_m *MockDatabasePort) ListAccounts(ctx context.Context, filter model.ListAccountFilter) ([]model.Account, error) {
+	ret := _m.Called(ctx, filter)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListAccounts")
+	}
+
+	var r0 []model.Account
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, model.ListAccountFilter) ([]model.Account, error)); ok {
+		return rf(ctx, filter)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, model.ListAccountFilter) []model.Account); ok {
+		r0 = rf(ctx, filter)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.Account)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, model.ListAccountFilter) error); ok {
+		r1 = rf(ctx, filter)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockDatabasePort_ListAccounts_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListAccounts'
+type MockDatabasePort_ListAccounts_Call struct {
+	*mock.Call
+}
+
+// ListAccounts is a helper method to define mock.On call
+//   - ctx context.Context
+//   - filter model.ListAccountFilter
+func (_e *MockDatabasePort_Expecter) ListAccounts(ctx interface{}, filter interface{}) *MockDatabasePort_ListAccounts_Call {
+	return &MockDatabasePort_ListAccounts_Call{Call: _e.mock.On("ListAccounts", ctx, filter)}
+}
+
+func (_c *MockDatabasePort_ListAccounts_Call) Run(run func(ctx context.Context, filter model.ListAccountFilter)) *MockDatabasePort_ListAccounts_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(model.ListAccountFilter))
+	})
+	return _c
+}
+
+func (_c *MockDatabasePort_ListAccounts_Call) Return(_a0 []model.Account, _a1 error) *MockDatabasePort_ListAccounts_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockDatabasePort_ListAccounts_Call) RunAndReturn(run func(context.Context, model.ListAccountFilter) ([]model.Account, error)) *MockDatabasePort_ListAccounts_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // MarkEventAsProcessed provides a mock function with given fields: ctx, eventID
 func (_m *MockDatabasePort) MarkEventAsProcessed(ctx context.Context, eventID uint64) error {
 	ret := _m.Called(ctx, eventID)

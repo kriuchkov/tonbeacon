@@ -65,6 +65,7 @@ func setupTestDB(t *testing.T) *bun.DB {
 }
 
 func (suite *RepositoryTestSuite) TestSomething() {
+	// Your test code here
 }
 
 func TestRepositoryTestSuite(t *testing.T) {

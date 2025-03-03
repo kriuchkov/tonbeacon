@@ -5,13 +5,15 @@ import (
 	"net"
 
 	"github.com/go-faster/errors"
+	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 
+	pb "github.com/kriuchkov/tonbeacon/api/grpc/v1"
 	"github.com/kriuchkov/tonbeacon/core/model"
 	"github.com/kriuchkov/tonbeacon/core/ports"
-	pb "github.com/kriuchkov/tonbeacon/proto/v1"
 )
 
 type TonBeacon struct {
@@ -35,19 +37,22 @@ func (s *TonBeacon) Stop() {
 }
 
 func (s *TonBeacon) CreateAccount(ctx context.Context, req *pb.CreateAccountRequest) (*pb.CreateAccountResponse, error) {
+	log.Info().Str("account_id", req.GetAccountId()).Msg("create account")
+
 	account, err := s.accountSvc.CreateAccount(ctx, req.GetAccountId())
 	if err != nil {
 		if errors.Is(err, model.ErrAccountExists) {
 			return createAccountPbError(codes.AlreadyExists, err), nil
 		}
 
+		log.Err(err).Msg("create account")
 		return createAccountPbError(codes.Internal, errors.Wrap(err, "create account")), nil
 	}
 
 	pbAccount := pb.Account{
-		AccountId:   account.ID,
-		SubwalletId: account.WalletID,
-		Address:     account.Address.String(),
+		AccountId: account.ID,
+		WalletId:  account.WalletID,
+		Address:   account.Address.String(),
 	}
 	return &pb.CreateAccountResponse{Account: &pbAccount}, nil
 }
@@ -71,22 +76,6 @@ func closeAccountPbError(code codes.Code, err error) *pb.CloseAccountResponse {
 	return &pb.CloseAccountResponse{Error: &pb.Error{Code: uint32(code), Message: err.Error()}}
 }
 
-// GetBalance retrieves the balance for a given account ID.
-// It uses the account service to fetch the balance and returns a gRPC response.
-//
-// Parameters:
-//
-//	ctx - The context for the request, used for cancellation and deadlines.
-//	req - The request containing the account ID for which the balance is to be retrieved.
-//
-// Returns:
-//
-//	*pb.GetBalanceResponse - The response containing the balance of the account.
-//	error - An error if the balance could not be retrieved, or nil if successful.
-//
-// Possible errors:
-//   - If the account is not found, a gRPC NotFound error is returned.
-//   - For other errors, a gRPC Internal error is returned with the wrapped error message.
 func (s *TonBeacon) GetBalance(ctx context.Context, req *pb.GetBalanceRequest) (*pb.GetBalanceResponse, error) {
 	balance, err := s.accountSvc.GetBalance(ctx, req.GetAccountId())
 	if err != nil {
@@ -101,4 +90,45 @@ func (s *TonBeacon) GetBalance(ctx context.Context, req *pb.GetBalanceRequest) (
 
 func getBalancePbError(code codes.Code, err error) *pb.GetBalanceResponse {
 	return &pb.GetBalanceResponse{Error: &pb.Error{Code: uint32(code), Message: err.Error()}}
+}
+
+func (s *TonBeacon) ListAccounts(ctx context.Context, req *pb.ListAccountsRequest) (*pb.ListAccountsResponse, error) {
+	log.Debug().Msg("list accounts")
+
+	var filter model.ListAccountFilter
+	if len(req.WalletIds) > 0 {
+		filter.WalletIDs = lo.ToPtr(req.WalletIds)
+	}
+
+	if req.IsActive != nil {
+		filter.IsClosed = lo.ToPtr(false)
+	}
+
+	filter.Offset = int(req.Offset)
+
+	if req.Limit == 0 || req.Limit > 1000 {
+		req.Limit = 1000
+	}
+	filter.Limit = int(req.Limit)
+
+	accounts, err := s.accountSvc.ListAccounts(ctx, filter)
+	if err != nil {
+		return listAccountsPbError(codes.Internal, errors.Wrap(err, "list accounts")), nil
+	}
+
+	pbAccounts := make([]*pb.Account, 0, len(accounts))
+	for _, account := range accounts {
+		pbAccount := pb.Account{
+			AccountId: account.ID,
+			WalletId:  account.WalletID,
+			Address:   account.Address.String(),
+		}
+		pbAccounts = append(pbAccounts, &pbAccount)
+	}
+
+	return &pb.ListAccountsResponse{Accounts: pbAccounts}, nil
+}
+
+func listAccountsPbError(code codes.Code, err error) *pb.ListAccountsResponse {
+	return &pb.ListAccountsResponse{Error: &pb.Error{Code: uint32(code), Message: err.Error()}}
 }

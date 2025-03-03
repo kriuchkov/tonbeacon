@@ -29,30 +29,34 @@ func main() {
 	if err != nil {
 		log.Panic().Err(err).Msg("config loading")
 	}
+	log.Info().Any("conf", cfg).Msg("config loaded")
+
+	db := bun.NewDB(sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(cfg.Database.DSN()))), pgdialect.New())
+
+	if err := db.PingContext(ctx); err != nil {
+		log.Panic().Err(err).Msg("db connection")
+	}
+
+	repositoryAdapter := repository.New(db)
 
 	client := liteclientutils.NewConnectionPool()
 
 	if err := client.AddConnectionsFromConfigUrl(ctx, "https://tonutils.com/testnet-global.config.json"); err != nil {
-		panic(err)
+		log.Panic().Err(err).Msg("liteclient connection")
 	}
 
 	liteClient := tonutils.NewAPIClient(client, tonutils.ProofCheckPolicySecure)
+	log.Info().Msg("liteclient connected")
 
-	masterWallet, err := walletutils.FromSeed(liteClient, cfg.Master.Seed, cfg.Master.Version)
+	masterWallet, err := walletutils.FromSeed(liteClient, cfg.Master.GetSeed(), cfg.Master.Version)
 	if err != nil {
 		log.Panic().Err(err).Msg("master wallet creation")
 	}
-
-	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(cfg.Database.DSN())))
-	db := bun.NewDB(sqldb, pgdialect.New())
-
-	repositoryAdapter := repository.New(db)
 
 	accountSvc := account.New(account.Options{
 		WalletManager:   ton.NewWalletAdapter(liteClient, masterWallet),
 		TxManager:       repository.NewTxRepository(db),
 		DatabaseManager: repositoryAdapter,
-		EventManager:    nil, //TODO: add kafka manager
 	})
 
 	lis, err := net.Listen("tcp", cfg.GRPCPort)

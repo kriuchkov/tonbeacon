@@ -171,6 +171,53 @@ func (_c *MockDatabaseTransactionPort_Rollback_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+// WithInTransaction provides a mock function with given fields: ctx, f
+func (_m *MockDatabaseTransactionPort) WithInTransaction(ctx context.Context, f func(context.Context) error) error {
+	ret := _m.Called(ctx, f)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WithInTransaction")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, func(context.Context) error) error); ok {
+		r0 = rf(ctx, f)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockDatabaseTransactionPort_WithInTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithInTransaction'
+type MockDatabaseTransactionPort_WithInTransaction_Call struct {
+	*mock.Call
+}
+
+// WithInTransaction is a helper method to define mock.On call
+//   - ctx context.Context
+//   - f func(context.Context) error
+func (_e *MockDatabaseTransactionPort_Expecter) WithInTransaction(ctx interface{}, f interface{}) *MockDatabaseTransactionPort_WithInTransaction_Call {
+	return &MockDatabaseTransactionPort_WithInTransaction_Call{Call: _e.mock.On("WithInTransaction", ctx, f)}
+}
+
+func (_c *MockDatabaseTransactionPort_WithInTransaction_Call) Run(run func(ctx context.Context, f func(context.Context) error)) *MockDatabaseTransactionPort_WithInTransaction_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(func(context.Context) error))
+	})
+	return _c
+}
+
+func (_c *MockDatabaseTransactionPort_WithInTransaction_Call) Return(_a0 error) *MockDatabaseTransactionPort_WithInTransaction_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockDatabaseTransactionPort_WithInTransaction_Call) RunAndReturn(run func(context.Context, func(context.Context) error) error) *MockDatabaseTransactionPort_WithInTransaction_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockDatabaseTransactionPort creates a new instance of MockDatabaseTransactionPort. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockDatabaseTransactionPort(t interface {

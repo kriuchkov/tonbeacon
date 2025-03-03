@@ -29,17 +29,7 @@ func TestAccount_CreateAccount(t *testing.T) {
 		expectedError error
 	}
 
-	type beginMock struct {
-		callCount     int
-		expectedError error
-	}
-
-	type rollbackMock struct {
-		callCount     int
-		expectedError error
-	}
-
-	type commitMock struct {
+	type withInTransaction struct {
 		callCount     int
 		expectedError error
 	}
@@ -78,20 +68,16 @@ func TestAccount_CreateAccount(t *testing.T) {
 		expectedResult *model.Account
 
 		isAccountExistsMock
-		beginMock
-		rollbackMock
-		commitMock
+		withInTransaction
 		insertAccountMock
 		createWalletMock
 		updateAccountMock
 		publishEventMock
 	}{
 		{
-			name:         "successful account creation",
-			accountID:    "test-account",
-			beginMock:    beginMock{callCount: 1},
-			rollbackMock: rollbackMock{callCount: 1},
-			commitMock:   commitMock{callCount: 1},
+			name:              "successful account creation",
+			accountID:         "test-account",
+			withInTransaction: withInTransaction{callCount: 1},
 			isAccountExistsMock: isAccountExistsMock{
 				callCount: 1,
 				accountID: "test-account",
@@ -125,17 +111,9 @@ func TestAccount_CreateAccount(t *testing.T) {
 
 			// Transaction manager mock
 			mockTx := portsmocks.NewMockDatabaseTransactionPort(t)
-			if tt.beginMock.callCount > 0 {
-				param := tt.beginMock
-				mockTx.On("Begin", ctx).Return(context.Background(), param.expectedError).Times(param.callCount)
-			}
-			if tt.rollbackMock.callCount > 0 {
-				param := tt.rollbackMock
-				mockTx.On("Rollback", ctx).Return(param.expectedError).Times(param.callCount)
-			}
-			if tt.commitMock.callCount > 0 {
-				param := tt.commitMock
-				mockTx.On("Commit", ctx).Return(param.expectedError).Times(param.callCount)
+			if tt.withInTransaction.callCount > 0 {
+				param := tt.withInTransaction
+				mockTx.On("WithInTransaction", ctx).Return(context.Background(), param.expectedError).Times(param.callCount)
 			}
 
 			// Database manager mock

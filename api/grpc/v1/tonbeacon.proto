@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package tonbeacon.v1;
+
+option go_package = "./proto";
+
+service TonBeacon {
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse) {}
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse) {}
+  rpc CloseAccount(CloseAccountRequest) returns (CloseAccountResponse) {}
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse) {}
+}
+
+message Error {
+  uint32 code = 1;
+  string message = 2;
+}
+
+message Account {
+  string account_id = 1;
+  uint32 wallet_id = 2;
+  string address = 3;
+}
+
+message CreateAccountRequest {
+  string account_id = 1;
+}
+
+message CreateAccountResponse {
+  Error error = 1; 
+  Account account = 2;
+}
+
+message CloseAccountRequest {
+  string account_id = 1;
+}
+
+message CloseAccountResponse {
+  Error error = 1;
+}
+
+message GetBalanceRequest {
+  string account_id = 1;
+}
+
+message GetBalanceResponse {
+  Error error = 1;
+  int64 balance = 2;
+}
+
+message ListAccountsRequest {
+  repeated uint32 wallet_ids = 1;
+  optional bool is_active = 2;
+  uint32 offset = 3;  // Starting position
+  uint32 limit = 4;   // Maximum number of records to return
+}
+
+message ListAccountsResponse {
+  Error error = 1;
+  repeated Account accounts = 2;
+  PageInfo page_info = 3;  // Pagination information
+}
+
+// New message for pagination metadata
+message PageInfo {
+  uint32 total_count = 1;
+  uint32 offset = 2;
+  uint32 limit = 3;
+  bool has_more = 4;
+}

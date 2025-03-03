@@ -35,15 +35,17 @@ func (suite *WalletManagerTestSuite) SetupTest() {
 	suite.Require().NotEmpty(seed)
 	suite.T().Logf("Seed phrase: %s\n", seed)
 
-	api := tonutils.NewAPIClient(client)
+	liteClient := tonutils.NewAPIClient(client, tonutils.ProofCheckPolicyFast).WithRetry()
 
-	masterWallet, err := walletutils.FromSeed(api, seed, walletutils.V4R1)
+	masterWallet, err := walletutils.FromSeed(liteClient, seed, walletutils.ConfigV5R1Final{
+		NetworkGlobalID: walletutils.TestnetGlobalID,
+		Workchain:       0,
+	})
 	suite.Require().NoError(err)
 
 	suite.T().Logf("Master wallet address: %s\n", masterWallet.WalletAddress().String())
 	suite.masterWallet = masterWallet
 
-	liteClient := tonutils.NewAPIClient(client, tonutils.ProofCheckPolicySecure)
 	suite.walletAdapter = tonadapter.NewWalletAdapter(liteClient, masterWallet)
 }
 
@@ -64,6 +66,20 @@ func (suite *WalletManagerTestSuite) TestWalletManager() {
 	suite.Require().NoError(err)
 
 	suite.T().Logf("Subwallet address 3: %s\n", subWallet3.WalletAddress().String())
+}
+
+func (suite *WalletManagerTestSuite) TestGetBalance() {
+	ctx := context.Background()
+
+	subWallet, err := suite.walletAdapter.CreateWallet(ctx, 1)
+	suite.Require().NoError(err)
+
+	suite.T().Logf("Subwallet address: %s\n", subWallet.WalletAddress().String())
+
+	balance, err := suite.walletAdapter.GetBalance(ctx, 1)
+	suite.Require().NoError(err)
+
+	suite.T().Logf("Balance: %v\n", balance)
 }
 
 func TestWalletManagerTestSuite(t *testing.T) {

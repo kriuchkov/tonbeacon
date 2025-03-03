@@ -10,11 +10,10 @@ import (
 
 type Account struct {
 	bun.BaseModel `bun:"table:accounts"`
-
-	ID         string  `bun:"id,pk"`
-	WalletID   uint32  `bun:"wallet_id,unique,notnull"`
-	TonAddress *string `bun:"ton_address"`
-	IsClosed   bool    `bun:"is_closed"`
+	ID            string  `bun:"id,pk"`
+	WalletID      uint32  `bun:"wallet_id,unique,notnull,default"`
+	TonAddress    *string `bun:"ton_address"`
+	IsClosed      bool    `bun:"is_closed"`
 }
 
 func (a *Account) toModel() *model.Account {
@@ -37,8 +36,8 @@ func fromModelAccount(account *model.Account) *Account {
 	}
 	return &Account{
 		ID:         account.ID,
-		WalletID:   account.WalletID,
 		TonAddress: tonAddress,
+		WalletID:   account.WalletID,
 	}
 }
 

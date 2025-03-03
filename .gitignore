@@ -16,3 +16,4 @@ go.work.sum
 # env file
 .env
 .dev
+.config.api.yaml

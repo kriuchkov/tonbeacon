@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v5.26.1
-// source: proto/v1/tonbeacon.proto
+// source: api/grpc/v1/tonbeacon.proto
 
 package proto
 
@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	TonBeacon_CreateAccount_FullMethodName = "/tonbeacon.v1.TonBeacon/CreateAccount"
+	TonBeacon_ListAccounts_FullMethodName  = "/tonbeacon.v1.TonBeacon/ListAccounts"
 	TonBeacon_CloseAccount_FullMethodName  = "/tonbeacon.v1.TonBeacon/CloseAccount"
 	TonBeacon_GetBalance_FullMethodName    = "/tonbeacon.v1.TonBeacon/GetBalance"
 )
@@ -29,6 +30,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TonBeaconClient interface {
 	CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error)
+	ListAccounts(ctx context.Context, in *ListAccountsRequest, opts ...grpc.CallOption) (*ListAccountsResponse, error)
 	CloseAccount(ctx context.Context, in *CloseAccountRequest, opts ...grpc.CallOption) (*CloseAccountResponse, error)
 	GetBalance(ctx context.Context, in *GetBalanceRequest, opts ...grpc.CallOption) (*GetBalanceResponse, error)
 }
@@ -44,6 +46,15 @@ func NewTonBeaconClient(cc grpc.ClientConnInterface) TonBeaconClient {
 func (c *tonBeaconClient) CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error) {
 	out := new(CreateAccountResponse)
 	err := c.cc.Invoke(ctx, TonBeacon_CreateAccount_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tonBeaconClient) ListAccounts(ctx context.Context, in *ListAccountsRequest, opts ...grpc.CallOption) (*ListAccountsResponse, error) {
+	out := new(ListAccountsResponse)
+	err := c.cc.Invoke(ctx, TonBeacon_ListAccounts_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,6 +84,7 @@ func (c *tonBeaconClient) GetBalance(ctx context.Context, in *GetBalanceRequest,
 // for forward compatibility
 type TonBeaconServer interface {
 	CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error)
+	ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error)
 	CloseAccount(context.Context, *CloseAccountRequest) (*CloseAccountResponse, error)
 	GetBalance(context.Context, *GetBalanceRequest) (*GetBalanceResponse, error)
 	mustEmbedUnimplementedTonBeaconServer()
@@ -84,6 +96,9 @@ type UnimplementedTonBeaconServer struct {
 
 func (UnimplementedTonBeaconServer) CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAccount not implemented")
+}
+func (UnimplementedTonBeaconServer) ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAccounts not implemented")
 }
 func (UnimplementedTonBeaconServer) CloseAccount(context.Context, *CloseAccountRequest) (*CloseAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CloseAccount not implemented")
@@ -118,6 +133,24 @@ func _TonBeacon_CreateAccount_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TonBeaconServer).CreateAccount(ctx, req.(*CreateAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TonBeacon_ListAccounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAccountsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TonBeaconServer).ListAccounts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TonBeacon_ListAccounts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TonBeaconServer).ListAccounts(ctx, req.(*ListAccountsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -170,6 +203,10 @@ var TonBeacon_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TonBeacon_CreateAccount_Handler,
 		},
 		{
+			MethodName: "ListAccounts",
+			Handler:    _TonBeacon_ListAccounts_Handler,
+		},
+		{
 			MethodName: "CloseAccount",
 			Handler:    _TonBeacon_CloseAccount_Handler,
 		},
@@ -179,5 +216,5 @@ var TonBeacon_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/v1/tonbeacon.proto",
+	Metadata: "api/grpc/v1/tonbeacon.proto",
 }

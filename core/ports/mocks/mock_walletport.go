@@ -81,6 +81,122 @@ func (_c *MockWalletPort_CreateWallet_Call) RunAndReturn(run func(context.Contex
 	return _c
 }
 
+// GetBalance provides a mock function with given fields: ctx, walletID
+func (_m *MockWalletPort) GetBalance(ctx context.Context, walletID uint32) (uint64, error) {
+	ret := _m.Called(ctx, walletID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetBalance")
+	}
+
+	var r0 uint64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) (uint64, error)); ok {
+		return rf(ctx, walletID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) uint64); ok {
+		r0 = rf(ctx, walletID)
+	} else {
+		r0 = ret.Get(0).(uint64)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
+		r1 = rf(ctx, walletID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockWalletPort_GetBalance_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetBalance'
+type MockWalletPort_GetBalance_Call struct {
+	*mock.Call
+}
+
+// GetBalance is a helper method to define mock.On call
+//   - ctx context.Context
+//   - walletID uint32
+func (_e *MockWalletPort_Expecter) GetBalance(ctx interface{}, walletID interface{}) *MockWalletPort_GetBalance_Call {
+	return &MockWalletPort_GetBalance_Call{Call: _e.mock.On("GetBalance", ctx, walletID)}
+}
+
+func (_c *MockWalletPort_GetBalance_Call) Run(run func(ctx context.Context, walletID uint32)) *MockWalletPort_GetBalance_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint32))
+	})
+	return _c
+}
+
+func (_c *MockWalletPort_GetBalance_Call) Return(_a0 uint64, _a1 error) *MockWalletPort_GetBalance_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockWalletPort_GetBalance_Call) RunAndReturn(run func(context.Context, uint32) (uint64, error)) *MockWalletPort_GetBalance_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetExtraCurrenciesBalance provides a mock function with given fields: ctx, walletID
+func (_m *MockWalletPort) GetExtraCurrenciesBalance(ctx context.Context, walletID uint32) ([]model.Balance, error) {
+	ret := _m.Called(ctx, walletID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetExtraCurrenciesBalance")
+	}
+
+	var r0 []model.Balance
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) ([]model.Balance, error)); ok {
+		return rf(ctx, walletID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) []model.Balance); ok {
+		r0 = rf(ctx, walletID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.Balance)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
+		r1 = rf(ctx, walletID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockWalletPort_GetExtraCurrenciesBalance_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetExtraCurrenciesBalance'
+type MockWalletPort_GetExtraCurrenciesBalance_Call struct {
+	*mock.Call
+}
+
+// GetExtraCurrenciesBalance is a helper method to define mock.On call
+//   - ctx context.Context
+//   - walletID uint32
+func (_e *MockWalletPort_Expecter) GetExtraCurrenciesBalance(ctx interface{}, walletID interface{}) *MockWalletPort_GetExtraCurrenciesBalance_Call {
+	return &MockWalletPort_GetExtraCurrenciesBalance_Call{Call: _e.mock.On("GetExtraCurrenciesBalance", ctx, walletID)}
+}
+
+func (_c *MockWalletPort_GetExtraCurrenciesBalance_Call) Run(run func(ctx context.Context, walletID uint32)) *MockWalletPort_GetExtraCurrenciesBalance_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint32))
+	})
+	return _c
+}
+
+func (_c *MockWalletPort_GetExtraCurrenciesBalance_Call) Return(_a0 []model.Balance, _a1 error) *MockWalletPort_GetExtraCurrenciesBalance_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockWalletPort_GetExtraCurrenciesBalance_Call) RunAndReturn(run func(context.Context, uint32) ([]model.Balance, error)) *MockWalletPort_GetExtraCurrenciesBalance_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockWalletPort creates a new instance of MockWalletPort. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockWalletPort(t interface {
