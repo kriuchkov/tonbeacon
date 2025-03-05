@@ -187,6 +187,65 @@ func (_c *MockDatabasePort_InsertAccount_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
+// InsertTransaction provides a mock function with given fields: ctx, tx
+func (_m *MockDatabasePort) InsertTransaction(ctx context.Context, tx *model.Transaction) (*model.Transaction, error) {
+	ret := _m.Called(ctx, tx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InsertTransaction")
+	}
+
+	var r0 *model.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *model.Transaction) (*model.Transaction, error)); ok {
+		return rf(ctx, tx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *model.Transaction) *model.Transaction); ok {
+		r0 = rf(ctx, tx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *model.Transaction) error); ok {
+		r1 = rf(ctx, tx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockDatabasePort_InsertTransaction_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InsertTransaction'
+type MockDatabasePort_InsertTransaction_Call struct {
+	*mock.Call
+}
+
+// InsertTransaction is a helper method to define mock.On call
+//   - ctx context.Context
+//   - tx *model.Transaction
+func (_e *MockDatabasePort_Expecter) InsertTransaction(ctx interface{}, tx interface{}) *MockDatabasePort_InsertTransaction_Call {
+	return &MockDatabasePort_InsertTransaction_Call{Call: _e.mock.On("InsertTransaction", ctx, tx)}
+}
+
+func (_c *MockDatabasePort_InsertTransaction_Call) Run(run func(ctx context.Context, tx *model.Transaction)) *MockDatabasePort_InsertTransaction_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*model.Transaction))
+	})
+	return _c
+}
+
+func (_c *MockDatabasePort_InsertTransaction_Call) Return(_a0 *model.Transaction, _a1 error) *MockDatabasePort_InsertTransaction_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockDatabasePort_InsertTransaction_Call) RunAndReturn(run func(context.Context, *model.Transaction) (*model.Transaction, error)) *MockDatabasePort_InsertTransaction_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsAccountExists provides a mock function with given fields: ctx, accountID
 func (_m *MockDatabasePort) IsAccountExists(ctx context.Context, accountID string) (bool, error) {
 	ret := _m.Called(ctx, accountID)

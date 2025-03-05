@@ -14,6 +14,7 @@ import (
 	"github.com/kriuchkov/tonbeacon/adapters/consumer"
 	"github.com/kriuchkov/tonbeacon/adapters/repository"
 	"github.com/kriuchkov/tonbeacon/ports/outbox"
+	"github.com/kriuchkov/tonbeacon/ports/transaction"
 )
 
 func main() {
@@ -39,8 +40,21 @@ func main() {
 		Writer:        nil,
 	})
 
-	log.Info().Msg("consumer started")
-	outboxConsumer.Consumer(ctx)
+	log.Info().Msg("starting outbox consumer")
+	go outboxConsumer.Consumer(ctx)
+
+	handler := transaction.New(ctx, &transaction.Options{})
+
+	kafkaConsumer := consumer.NewKafkaConsumer(consumer.KafkaConsumerOptions{
+		Brokers: cfg.Kafka.Brokers,
+		Topic:   cfg.Kafka.Topic,
+		GroupID: cfg.Kafka.GroupID,
+		Handler: handler,
+		//SaramaConfig: config,
+	})
+
+	log.Info().Msg("starting kafka consumer")
+	go kafkaConsumer.Consume(ctx)
 
 	<-ctx.Done()
 	log.Info().Msg("consumer stopped")

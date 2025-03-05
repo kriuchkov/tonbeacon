@@ -70,3 +70,42 @@ func fromModelOutboxEvent(event model.OutboxEvent) *OutboxEvent {
 		Processed: event.Processed,
 	}
 }
+
+type Transaction struct {
+	bun.BaseModel `bun:"table:transactions"`
+
+	ID             string    `bun:"id,pk"`
+	Sender         string    `bun:"sender"`
+	Receiver       string    `bun:"receiver"`
+	Amount         float64   `bun:"amount"`
+	BlockID        string    `bun:"block_id"`
+	CreatedAt      time.Time `bun:"created_at"`
+	SenderIsOurs   bool      `bun:"sender_is_ours"`
+	ReceiverIsOurs bool      `bun:"receiver_is_ours"`
+}
+
+func (t *Transaction) toModel() *model.Transaction {
+	return &model.Transaction{
+		ID:             t.ID,
+		Sender:         t.Sender,
+		Receiver:       t.Receiver,
+		Amount:         t.Amount,
+		BlockID:        t.BlockID,
+		CreatedAt:      t.CreatedAt,
+		SenderIsOurs:   t.SenderIsOurs,
+		ReceiverIsOurs: t.ReceiverIsOurs,
+	}
+}
+
+func fromModelTransaction(transaction *model.Transaction) *Transaction {
+	return &Transaction{
+		ID:             transaction.ID,
+		Sender:         transaction.Sender,
+		Receiver:       transaction.Receiver,
+		Amount:         transaction.Amount,
+		BlockID:        transaction.BlockID,
+		CreatedAt:      transaction.CreatedAt,
+		SenderIsOurs:   transaction.SenderIsOurs,
+		ReceiverIsOurs: transaction.ReceiverIsOurs,
+	}
+}

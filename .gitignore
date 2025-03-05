@@ -16,3 +16,4 @@ vendor/
 .env
 .dev
 .config.api.yaml
+.config.scanner.yaml

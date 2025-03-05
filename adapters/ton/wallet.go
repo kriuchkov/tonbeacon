@@ -10,7 +10,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/xssnick/tonutils-go/address"
 	"github.com/xssnick/tonutils-go/tlb"
-	"github.com/xssnick/tonutils-go/ton"
 	"github.com/xssnick/tonutils-go/ton/wallet"
 
 	"github.com/kriuchkov/tonbeacon/core/model"
@@ -18,8 +17,6 @@ import (
 )
 
 type (
-	APIClientWrapped = ton.APIClientWrapped
-
 	WalletWrapped interface {
 		PrivateKey() ed25519.PrivateKey
 		GetSubwallet(subwallet uint32) (*wallet.Wallet, error)

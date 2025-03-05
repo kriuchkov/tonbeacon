@@ -11,4 +11,6 @@ packages:
       DatabasePort:
       DatabaseTransactionPort:
       OutboxMessagePort:
+      AccountServicePort:
+      
       
