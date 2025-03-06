@@ -7,6 +7,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -23,16 +24,19 @@ import (
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer cancel()
+	defer log.Info().Msg("scanner stopped")
 
 	cfg, err := LoadConfig()
 	if err != nil {
-		log.Panic().Err(err).Msg("config loading")
+		panic(fmt.Sprintf("load config: %s", err))
 	}
 
 	client := liteclientutils.NewConnectionPool()
 	if err := client.AddConnectionsFromConfigUrl(ctx, cfg.Ton.URL); err != nil {
-		log.Panic().Err(err).Msg("liteclient connection")
+		panic("liteclient connection")
 	}
+
+	log.Info().Msg("liteclient connected")
 
 	liteClient := tonutils.NewAPIClient(client, tonutils.ProofCheckPolicyFast).WithRetry()
 	scanner := ton.NewScanner(liteClient, &ton.OptionsScanner{
@@ -41,17 +45,19 @@ func main() {
 
 	publisher, err := setPublisher(cfg)
 	if err != nil {
-		log.Panic().Err(err).Msg("failed to create publisher")
+		panic(fmt.Sprintf("set publisher: %s", err))
 	}
 	defer publisher.Close()
 
+	log.Info().Any("type", cfg.PublisherType).Msg("publisher created")
+
 	resultsCh := make(chan any, 1000)
 	if err := scanner.RunAsync(ctx, resultsCh); err != nil {
-		log.Panic().Err(err).Msg("run scanner")
+		panic(fmt.Sprintf("scanner run: %s", err))
 	}
 
-	if cfg.PPROF {
-		go func() { http.ListenAndServe(":6060", nil) }()
+	if cfg.PPROF != "" {
+		go func() { http.ListenAndServe(cfg.PPROF, nil) }()
 	}
 
 	log.Info().Msg("scanner started")
@@ -59,7 +65,7 @@ func main() {
 		select {
 		case result := <-resultsCh:
 			if err := publisher.Publish(ctx, result); err != nil {
-				log.Error().Err(err).Msg("failed to publish message")
+				log.Error().Err(err).Msg("publish message")
 			}
 		case <-ctx.Done():
 			return

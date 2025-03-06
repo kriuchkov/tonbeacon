@@ -1,76 +1,91 @@
 version: "3.8"
 
 services:
-  app:
+  scanner:
     build:
       context: .
       dockerfile: Dockerfile
+    networks:
+      - tonbeacon-network
     ports:
-      - "8080:8080" 
-      - "50051:50051"
-    depends_on:
-      - postgres
-      - kafka
+      - "6061:6060"    
     environment:
-      - TONBEACON_DB_CONN_STRING=postgres://user:password@postgres:5432/tonbeacon?sslmode=disable
+      - TONBEACON_LOG_LEVEL=debug
+      - TONBEACON_PPROF=:6060
+      - TONBEACON_PUBLISHER_TYPE=kafka
       - TONBEACON_KAFKA_BROKERS=kafka:9092
-      - TONBEACON_KAFKA_TOPIC=tonbeacon_events
-      - TONBEACON_GRPC_PORT=:50051
-      - TONBEACON_TON_SERVER_ADDR=5.9.10.47:49206
-      - TONBEACON_TON_SERVER_KEY=n4VDv1pgo1eWpueRwPYdSkK4HMKp8N+a1POiSjiygQ0=
-      - TONBEACON_MASTER_SEED=apple banana cherry 
-    volumes:
-      - ./:/app 
-
-  postgres:
-    image: postgres:15
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=tonbeacon
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "user"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  flyway:
-    image: flyway/flyway:10
-    command: -url=jdbc:postgresql://postgres:5432/tonbeacon -user=user -password=password -connectRetries=60 migrate
-    volumes:
-      - ./db/migrations:/flyway/sql
+      - TONBEACON_KAFKA_TOPIC=ton_transactions
+      - TONBEACON_KAFKA_MAX_RETRIES=3
+      - TONBEACON_KAFKA_REQUIRED_ACKS=1
+      - TONBEACON_SCANNING_NUM_WORKERS=40
+      - TONBEACON_TON_URL=https://tonutils.com/testnet-global.config.json
     depends_on:
-      postgres:
-        condition: service_healthy
-
+      - kafka
+      - topic-creator
+    restart: unless-stopped
+    command: ["./scanner"]
 
   kafka:
-    image: apache/kafka:3.8.0 
-    ports:
-      - "9092:9092"
+    image: confluentinc/cp-kafka:7.5.0
+    networks:
+      - tonbeacon-network
     environment:
-      - KAFKA_NODE_ID=1
-      - KAFKA_PROCESS_ROLES=broker,controller 
-      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
-      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
-      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
-      - KAFKA_LOG_DIRS=/var/lib/kafka/data
-    volumes:
-      - kafka_data:/var/lib/kafka/data
+      CLUSTER_ID: MTIzNDU2Nzg5MDEyMzQ1Nj
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
     healthcheck:
-      test: ["CMD", "kafka-topics", "--list", "--bootstrap-server", "localhost:9092"]
-      interval: 5s
-      timeout: 10s
+      test: ["CMD", "/usr/bin/kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    networks:
+      - tonbeacon-network
+    ports:
+      - "8081:8080" 
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      DYNAMIC_CONFIG_ENABLED: "true"
+    depends_on:
+      - kafka
+    restart: unless-stopped
+
+  topic-creator:
+    image: confluentinc/cp-kafka:7.5.0
+    networks:
+      - tonbeacon-network
+    depends_on:
+      - kafka
+    entrypoint: ["/bin/bash", "-c"]
+    command: >
+      "until /usr/bin/kafka-topics --list --bootstrap-server kafka:9092; do
+       echo 'waiting for kafka to be ready';
+       sleep 2;
+       done;
+       /usr/bin/kafka-topics --create --topic ton_transactions --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1;
+       echo 'kafka topic created';
+       exit 0"
+    restart: "on-failure"
 
 volumes:
-  postgres_data:
   kafka_data:
+
+networks:
+  tonbeacon-network:
+    driver: bridge
