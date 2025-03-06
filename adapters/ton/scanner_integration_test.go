@@ -34,18 +34,13 @@ func (suite *ScannerTestSuite) TestRun() {
 	ctx, cancel := context.WithTimeout(context.Background(), 40*time.Second)
 	defer cancel()
 
-	// Create a channel to receive scanner events
-	resultsCh := make(chan interface{}, 100) // Adjust type based on your Scanner implementation
-
-	// Start scanner with the channel
+	resultsCh := make(chan any, 100)
 	suite.scanner.RunAsync(ctx, resultsCh)
 
-	// Process results from the channel
 	for {
 		select {
 		case result := <-resultsCh:
 			suite.T().Logf("Received: %+v", result)
-			// Add assertions if needed
 
 		case <-ctx.Done():
 			suite.T().Log("Scanner test completed")

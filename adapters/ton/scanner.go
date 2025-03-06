@@ -1,3 +1,7 @@
+// Scanner provides functionality for scanning the TON blockchain.
+// It includes logic for fetching blocks, transactions, and accounts.
+// Some network handling logic was partially taken from
+// https://github.com/xssnick/ton-payment-network/blob/master/tonpayments/chain/block-scan.go (thanks to the author).
 package ton
 
 import (
@@ -241,28 +245,23 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 		prevMaster, err := v.api.WaitForBlock(master.SeqNo-1).LookupBlock(ctx, master.Workchain, master.Shard, master.SeqNo-1)
 		if err != nil {
 			log.Debug().Err(err).Uint32("seqno", master.SeqNo-1).Msg("failed to get prev master block")
-			time.Sleep(300 * time.Millisecond)
 			continue
 		}
 
 		prevShards, err := v.api.GetBlockShardsInfo(ctx, prevMaster)
 		if err != nil {
 			log.Debug().Err(err).Uint32("master", master.SeqNo).Msg("failed to get shards on block")
-			time.Sleep(300 * time.Millisecond)
 			continue
 		}
 
-		// getting information about other work-chains and shards of master block
 		currentShards, err := v.api.GetBlockShardsInfo(ctx, master)
 		if err != nil {
 			log.Debug().Err(err).Uint32("master", master.SeqNo).Msg("failed to get shards on block")
-			time.Sleep(300 * time.Millisecond)
 			continue
 		}
+
 		log.Debug().Uint32("seqno", master.SeqNo).Dur("took", time.Since(tm)).Msg("shards fetched")
 
-		// shards in master block may have holes, e.g. shard seqno 2756461, then 2756463, and no 2756462 in master chain
-		// thus we need to scan a bit back in case of discovering a hole, till last seen, to fill the misses.
 		var newShards []*tonutils.BlockIDExt
 		for _, shard := range currentShards {
 			for {
@@ -290,7 +289,7 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 		var shardsWg sync.WaitGroup
 		shardsWg.Add(len(newShards))
 		shardBlocksNum = uint64(len(newShards))
-		// for each shard block getting transactions
+
 		for _, shard := range newShards {
 			log.Debug().Uint32("seqno", shard.SeqNo).Uint64("shard", uint64(shard.Shard)).Int32("wc", shard.Workchain).Msg("scanning shard")
 
@@ -300,7 +299,7 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 				var block *tlbutils.Block
 				{
 					ctx := ctx
-					for z := 0; z < 20; z++ { // TODO: retry without loosing
+					for z := 0; z < 20; z++ {
 						ctx, err = v.api.Client().StickyContextNextNode(ctx)
 						if err != nil {
 							log.Debug().Err(err).Uint32("master", master.SeqNo).Int64("shard", shard.Shard).
@@ -367,7 +366,6 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 								addr:     addressutils.NewAddress(0, byte(shard.Workchain), ab.Addr),
 								callback: wg.Done,
 							}
-							// 1 tx for account is enough for us, as a reference
 							break
 						}
 					}

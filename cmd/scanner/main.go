@@ -50,7 +50,9 @@ func main() {
 		log.Panic().Err(err).Msg("run scanner")
 	}
 
-	go func() { http.ListenAndServe("localhost:6060", nil) }()
+	if cfg.PPROF {
+		go func() { http.ListenAndServe(":6060", nil) }()
+	}
 
 	log.Info().Msg("scanner started")
 	for {

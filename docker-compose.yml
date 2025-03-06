@@ -47,6 +47,7 @@ services:
       postgres:
         condition: service_healthy
 
+
   kafka:
     image: apache/kafka:3.8.0 
     ports:

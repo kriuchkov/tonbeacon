@@ -121,28 +121,5 @@ func MakeJettonTransferMessage(
 }
 
 func decodeBinaryComment(comment string) (*cell.Cell, error) {
-
-	/* bitString, err := boc.BitStringFromFiftHex(comment)
-	if err != nil {
-		return nil, err
-	}
-
-	c := boc.NewCell()
-	err = c.WriteUint(0xb3ddcf7d, 32) // binary_comment#b3ddcf7d
-	if err != nil {
-		return nil, err
-	} */
-
-	/* err = tongoTlb.Marshal(c, tongoTlb.SnakeData(*bitString))
-	if err != nil {
-		return nil, err
-	} */
-
-	/* 	b, err := c.ToBoc()
-	   	if err != nil {
-	   		return nil, err
-	   	} */
-
-	/* return cell.FromBOC(b) */
 	return nil, nil
 }

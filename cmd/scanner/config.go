@@ -39,7 +39,8 @@ type TonConfig struct {
 }
 
 type Config struct {
-	LogLevel      string
+	LogLevel      string         `mapstructure:"log_level"`
+	PPROF         bool           `mapstructure:"pprof"`
 	PublisherType PublisherType  `mapstructure:"publisher_type"`
 	Kafka         KafkaConfig    `mapstructure:"kafka"`
 	Scanning      ScanningConfig `mapstructure:"scanning"`
