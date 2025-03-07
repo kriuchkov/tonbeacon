@@ -51,18 +51,18 @@ func (a *Account) CreateAccount(ctx context.Context, accountID string) (*model.A
 			return errors.Wrap(err, "insert account")
 		}
 
-		wallet, err := a.walletManager.CreateWallet(ctx, account.WalletID)
+		var wallet model.WalletWrapper
+		wallet, err = a.walletManager.CreateWallet(ctx, account.WalletID)
 		if err != nil {
 			return errors.Wrap(err, "create wallet")
 		}
 
 		account.Address = wallet.WalletAddress()
-
-		if err := a.database.UpdateAccount(ctx, account); err != nil {
+		if err = a.database.UpdateAccount(ctx, account); err != nil {
 			return errors.Wrap(err, "update account")
 		}
 
-		if err := a.eventManager.Publish(ctx, model.AccountCreated, account); err != nil {
+		if err = a.eventManager.Publish(ctx, model.AccountCreated, account); err != nil {
 			return errors.Wrap(err, "publish event")
 		}
 		return nil

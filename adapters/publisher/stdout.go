@@ -13,7 +13,7 @@ var _ ports.PublisherPort = (*StdoutPublisher)(nil)
 
 type StdoutPublisher struct{}
 
-func (p *StdoutPublisher) Publish(ctx context.Context, message any) error {
+func (p *StdoutPublisher) Publish(_ context.Context, message any) error {
 	data, err := json.MarshalIndent(message, "", "  ")
 	if err != nil {
 		return err

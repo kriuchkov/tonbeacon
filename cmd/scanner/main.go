@@ -34,7 +34,7 @@ func main() {
 	}
 
 	client := liteclientutils.NewConnectionPool()
-	if err := client.AddConnectionsFromConfigUrl(ctx, cfg.Ton.URL); err != nil {
+	if err = client.AddConnectionsFromConfigUrl(ctx, cfg.Ton.URL); err != nil {
 		panic("liteclient connection")
 	}
 
@@ -54,19 +54,23 @@ func main() {
 	log.Info().Any("type", cfg.PublisherType).Msg("publisher created")
 
 	resultsCh := make(chan any, 1000)
-	if err := scanner.RunAsync(ctx, resultsCh); err != nil {
+	if err = scanner.RunAsync(ctx, resultsCh); err != nil {
 		panic(fmt.Sprintf("scanner run: %s", err))
 	}
 
 	if cfg.PPROF != "" {
-		go func() { http.ListenAndServe(cfg.PPROF, nil) }()
+		go func() {
+			if err := http.ListenAndServe(cfg.PPROF, nil); err != nil {
+				log.Error().Err(err).Msg("pprof server")
+			}
+		}()
 	}
 
 	log.Info().Msg("scanner started")
 	for {
 		select {
 		case result := <-resultsCh:
-			if err := publisher.Publish(ctx, result); err != nil {
+			if err = publisher.Publish(ctx, result); err != nil {
 				log.Error().Err(err).Msg("publish message")
 			}
 		case <-ctx.Done():

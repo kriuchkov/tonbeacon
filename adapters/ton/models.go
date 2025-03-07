@@ -26,12 +26,3 @@ func fromUtilsWallet(w *wallet.Wallet) *TonWallet {
 		Address: model.Address(w.WalletAddress().String()),
 	}
 }
-
-type shardID struct {
-	Workchain int32
-	Shard     int64
-}
-
-func getShardID(shard *ton.BlockIDExt) shardID {
-	return shardID{Workchain: shard.Workchain, Shard: shard.Shard}
-}

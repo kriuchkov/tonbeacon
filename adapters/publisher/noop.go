@@ -10,7 +10,7 @@ var _ ports.PublisherPort = (*NoopPublisher)(nil)
 
 type NoopPublisher struct{}
 
-func (p *NoopPublisher) Publish(ctx context.Context, message interface{}) error {
+func (p *NoopPublisher) Publish(_ context.Context, _ interface{}) error {
 	return nil
 }
 

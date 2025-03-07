@@ -79,7 +79,7 @@ func (o *Outbox) process(ctx context.Context) error {
 		return errors.Wrap(err, "get pending event")
 	}
 
-	if err := o.writer.WriteMessages(ctx, kafka.Message{Key: []byte(event.EventType), Value: event.Payload}); err != nil {
+	if err = o.writer.WriteMessages(ctx, kafka.Message{Key: []byte(event.EventType), Value: event.Payload}); err != nil {
 		return errors.Wrap(err, "write message")
 	}
 

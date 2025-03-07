@@ -69,6 +69,7 @@ func (w *WalletAdapter) GetExtraCurrenciesBalance(ctx context.Context, walletID 
 		if err != nil {
 			return nil, errors.Wrap(err, "load currencies")
 		}
+
 		log.Debug().Any("currencies", currencies).Msg("currencies")
 
 		balances := make([]model.Balance, 0, len(currencies))
@@ -147,7 +148,7 @@ func (w *WalletAdapter) TransferToMainWallet(ctx context.Context, walletID uint3
 	}
 
 	coinAmount := tlb.MustFromNano(big.NewInt(int64(amount)), 0)
-	if err := subwallet.TransferNoBounce(ctx, w.masterWallet.WalletAddress(), coinAmount, ""); err != nil {
+	if err = subwallet.TransferNoBounce(ctx, w.masterWallet.WalletAddress(), coinAmount, ""); err != nil {
 		return errors.Wrap(err, "transfer funds to main wallet")
 	}
 

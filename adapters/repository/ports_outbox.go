@@ -18,7 +18,7 @@ func (d *DatabaseAdapter) SaveEvent(ctx context.Context, event model.OutboxEvent
 	return nil
 }
 
-func (d *DatabaseAdapter) GetEvents(ctx context.Context, limit uint64) ([]model.OutboxEvent, error) {
+func (d *DatabaseAdapter) GetEvents(ctx context.Context, limit int64) ([]model.OutboxEvent, error) {
 	var events []OutboxEvent
 
 	idb := d.GetTxOrConn(ctx)

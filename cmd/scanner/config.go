@@ -121,7 +121,7 @@ func LoadConfig() (*Config, error) {
 	log.Logger = zerolog.New(os.Stderr).With().Timestamp().Logger()
 	zerolog.TimeFieldFormat = "2006-01-02 15:04:05.000"
 
-	if err := validator.New().Struct(&config); err != nil {
+	if err = validator.New().Struct(&config); err != nil {
 		return nil, errors.Wrap(err, "validate config")
 	}
 	return &config, nil

@@ -70,7 +70,7 @@ func (_c *MockDatabasePort_CloseAccount_Call) RunAndReturn(run func(context.Cont
 }
 
 // GetEvents provides a mock function with given fields: ctx, limit
-func (_m *MockDatabasePort) GetEvents(ctx context.Context, limit uint64) ([]model.OutboxEvent, error) {
+func (_m *MockDatabasePort) GetEvents(ctx context.Context, limit int64) ([]model.OutboxEvent, error) {
 	ret := _m.Called(ctx, limit)
 
 	if len(ret) == 0 {
@@ -79,10 +79,10 @@ func (_m *MockDatabasePort) GetEvents(ctx context.Context, limit uint64) ([]mode
 
 	var r0 []model.OutboxEvent
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint64) ([]model.OutboxEvent, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, int64) ([]model.OutboxEvent, error)); ok {
 		return rf(ctx, limit)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint64) []model.OutboxEvent); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, int64) []model.OutboxEvent); ok {
 		r0 = rf(ctx, limit)
 	} else {
 		if ret.Get(0) != nil {
@@ -90,7 +90,7 @@ func (_m *MockDatabasePort) GetEvents(ctx context.Context, limit uint64) ([]mode
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
 		r1 = rf(ctx, limit)
 	} else {
 		r1 = ret.Error(1)
@@ -106,14 +106,14 @@ type MockDatabasePort_GetEvents_Call struct {
 
 // GetEvents is a helper method to define mock.On call
 //   - ctx context.Context
-//   - limit uint64
+//   - limit int64
 func (_e *MockDatabasePort_Expecter) GetEvents(ctx interface{}, limit interface{}) *MockDatabasePort_GetEvents_Call {
 	return &MockDatabasePort_GetEvents_Call{Call: _e.mock.On("GetEvents", ctx, limit)}
 }
 
-func (_c *MockDatabasePort_GetEvents_Call) Run(run func(ctx context.Context, limit uint64)) *MockDatabasePort_GetEvents_Call {
+func (_c *MockDatabasePort_GetEvents_Call) Run(run func(ctx context.Context, limit int64)) *MockDatabasePort_GetEvents_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint64))
+		run(args[0].(context.Context), args[1].(int64))
 	})
 	return _c
 }
@@ -123,7 +123,7 @@ func (_c *MockDatabasePort_GetEvents_Call) Return(_a0 []model.OutboxEvent, _a1 e
 	return _c
 }
 
-func (_c *MockDatabasePort_GetEvents_Call) RunAndReturn(run func(context.Context, uint64) ([]model.OutboxEvent, error)) *MockDatabasePort_GetEvents_Call {
+func (_c *MockDatabasePort_GetEvents_Call) RunAndReturn(run func(context.Context, int64) ([]model.OutboxEvent, error)) *MockDatabasePort_GetEvents_Call {
 	_c.Call.Return(run)
 	return _c
 }

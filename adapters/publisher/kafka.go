@@ -57,7 +57,7 @@ func NewKafkaPublisher(opt *KafkaOptions) (*KafkaPublisher, error) {
 	return &KafkaPublisher{producer: producer, topic: opt.Topic}, nil
 }
 
-func (p *KafkaPublisher) Publish(ctx context.Context, message any) error {
+func (p *KafkaPublisher) Publish(_ context.Context, message any) error {
 	data, err := json.Marshal(message)
 	if err != nil {
 		return errors.Wrap(err, "json marshal")

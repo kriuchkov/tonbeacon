@@ -128,7 +128,7 @@ func (t *Transaction) Handle(ctx context.Context, message []byte) error {
 		Msg("processing relevant transaction")
 
 	err = t.txPort.WithInTransaction(ctx, func(ctx context.Context) error {
-		if _, err := t.transaction.InsertTransaction(ctx, &tx); err != nil {
+		if _, err = t.transaction.InsertTransaction(ctx, &tx); err != nil {
 			return errors.Wrap(err, "save tx")
 		}
 		return nil

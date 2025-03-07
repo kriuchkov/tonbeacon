@@ -13,9 +13,7 @@ import (
 	tonadapter "github.com/kriuchkov/tonbeacon/adapters/ton"
 )
 
-const (
-	testConfigUrl = "https://tonutils.com/testnet-global.config.json"
-)
+var testConfigUrl = "https://tonutils.com/testnet-global.config.json"
 
 type WalletManagerTestSuite struct {
 	suite.Suite

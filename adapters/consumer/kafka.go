@@ -71,7 +71,7 @@ type consumerGroupHandler struct {
 func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
 		if h.ctx.Err() != nil {
-			return nil // Контекст закрыт, выходим
+			return nil
 		}
 
 		log.Debug().
