@@ -16,6 +16,7 @@ import (
 	addressutils "github.com/xssnick/tonutils-go/address"
 	tlbutils "github.com/xssnick/tonutils-go/tlb"
 	tonutils "github.com/xssnick/tonutils-go/ton"
+	"github.com/xssnick/tonutils-go/tvm/cell"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/kriuchkov/tonbeacon/pkg/retrier"
@@ -103,7 +104,8 @@ func (v *Scanner) RunAsync(ctx context.Context, ch chan<- any) error {
 			masters = masters[:0]
 
 			for {
-				lastMaster, err := v.api.WaitForBlock(lastProcessed.SeqNo + 1).GetMasterchainInfo(ctx)
+				var lastMaster *tonutils.BlockIDExt
+				lastMaster, err = v.api.WaitForBlock(lastProcessed.SeqNo + 1).GetMasterchainInfo(ctx)
 				if err != nil {
 					log.Debug().Err(err).Uint32("seqno", lastProcessed.SeqNo+1).Msg("failed to get last block")
 					continue
@@ -142,9 +144,10 @@ func (v *Scanner) RunAsync(ctx context.Context, ch chan<- any) error {
 
 				for i := lastProcessed.SeqNo + 1; i <= lastProcessed.SeqNo+diff; i++ {
 					for {
-						nextMaster, err := v.api.WaitForBlock(i).LookupBlock(ctx, lastProcessed.Workchain, lastProcessed.Shard, i)
+						var nextMaster *tonutils.BlockIDExt
+						nextMaster, err = v.api.WaitForBlock(i).LookupBlock(ctx, lastProcessed.Workchain, lastProcessed.Shard, i)
 						if err != nil {
-							log.Debug().Err(err).Uint32("seqno", i).Msg("failed to get next block")
+							log.Debug().Err(err).Uint32("seqno", i).Msg("get next block")
 						}
 
 						masters = append(masters, nextMaster)
@@ -228,10 +231,11 @@ func (v *Scanner) getNotSeenShards(
 	}
 
 	for _, parent := range parents {
-		ext, err := v.getNotSeenShards(ctx, api, parent, prevShards)
-		if err != nil {
+		var ext []*tonutils.BlockIDExt
+		if ext, err = v.getNotSeenShards(ctx, api, parent, prevShards); err != nil {
 			return nil, errors.Wrap(err, "get not seen shards")
 		}
+
 		ret = append(ret, ext...)
 	}
 	return append(ret, shard), nil
@@ -301,9 +305,9 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 
 				var block *tlbutils.Block
 
-				err := v.retrier.Wrap(ctx, "fetch block", func() error {
-					ctxBlock, err := v.api.Client().StickyContextNextNode(ctx)
-					if err != nil {
+				err = v.retrier.Wrap(ctx, "fetch block", func() error {
+					var ctxBlock context.Context
+					if ctxBlock, err = v.api.Client().StickyContextNextNode(ctx); err != nil {
 						log.Debug().Err(err).Uint32("master", master.SeqNo).Int64("shard", shard.Shard).Msg("pick next node")
 						return errors.Wrap(err, "pick next node")
 					}
@@ -325,18 +329,18 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 
 				err = func() error {
 					shr := block.Extra.ShardAccountBlocks.BeginParse()
-					shardAccBlocks, err := shr.LoadDict(256)
-					if err != nil {
+
+					var shardAccBlocks *cell.Dictionary
+					if shardAccBlocks, err = shr.LoadDict(256); err != nil {
 						return errors.Wrap(err, "load shard account blocks")
 					}
 
-					var wg sync.WaitGroup
-
-					sab, err := shardAccBlocks.LoadAll()
-					if err != nil {
+					var sab []cell.DictKV
+					if sab, err = shardAccBlocks.LoadAll(); err != nil {
 						return errors.Wrap(err, "load all shard account blocks")
 					}
 
+					var wg sync.WaitGroup
 					for _, kv := range sab {
 						slc := kv.Value.MustToCell().BeginParse()
 						if err = tlbutils.LoadFromCell(&tlbutils.CurrencyCollection{}, slc); err != nil {
@@ -348,8 +352,8 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 							return errors.Wrap(err, "load account block")
 						}
 
-						allTx, err := ab.Transactions.LoadAll()
-						if err != nil {
+						var allTx []cell.DictKV
+						if allTx, err = ab.Transactions.LoadAll(); err != nil {
 							return errors.Wrap(err, "load all transactions")
 						}
 
@@ -396,7 +400,7 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 			})
 		}
 
-		if err := e.Wait(); err != nil {
+		if err = e.Wait(); err != nil {
 			log.Error().Err(err).Msg("scan shard")
 		}
 		return transactionsNum, shardBlocksNum

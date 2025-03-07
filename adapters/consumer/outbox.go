@@ -12,7 +12,7 @@ import (
 	"github.com/kriuchkov/tonbeacon/core/ports"
 )
 
-var (
+const (
 	defaultInterval = 10 * time.Millisecond
 )
 

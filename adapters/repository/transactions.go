@@ -101,7 +101,7 @@ func (t TxRepository) WithInTransactionWithOptions(
 	return err
 }
 
-func (t TxRepository) WithInTransaction(ctx context.Context, txFunc func(ctx context.Context) error) (err error) {
+func (t TxRepository) WithInTransaction(ctx context.Context, txFunc func(ctx context.Context) error) error {
 	return t.WithInTransactionWithOptions(ctx, txFunc, nil)
 }
 

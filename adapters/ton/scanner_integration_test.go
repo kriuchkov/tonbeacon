@@ -22,7 +22,7 @@ func (suite *ScannerTestSuite) SetupTest() {
 
 	client := liteclientutils.NewConnectionPool()
 
-	err := client.AddConnectionsFromConfigUrl(ctx, testConfigUrl)
+	err := client.AddConnectionsFromConfigUrl(ctx, testConfigURL)
 	suite.Require().NoError(err)
 
 	liteClient := tonutils.NewAPIClient(client, tonutils.ProofCheckPolicyFast).WithRetry()

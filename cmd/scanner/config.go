@@ -101,7 +101,8 @@ func LoadConfig() (*Config, error) {
 	v.SetDefault("publisher_type", defaultPublisherType)
 
 	if err := v.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		var errViper viper.ConfigFileNotFoundError
+		if !errors.As(err, &errViper) {
 			return nil, errors.Wrap(err, "read config")
 		}
 	}

@@ -104,6 +104,8 @@ func setPublisher(cfg *Config) (ports.PublisherPort, error) {
 			RequiredAcks: cfg.Kafka.RequiredAcks,
 			MaxRetries:   cfg.Kafka.MaxRetries,
 		})
+	case NoopPublisherType:
+		return &publisher.NoopPublisher{}, nil
 	default:
 		return &publisher.NoopPublisher{}, nil
 	}

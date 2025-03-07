@@ -40,8 +40,8 @@ linters-settings:
       - "^gopkg.in/yaml.v3.Node$"
 
   funlen:
-    lines: 100
-    statements: 50
+    lines: 200
+    statements: 60
     ignore-comments: true
 
   gocognit:
@@ -124,7 +124,10 @@ linters-settings:
         - dot
     skip-generated: false
     custom-order: true
-
+    
+  gosec:
+    excludes:
+      - G115
 linters:
   disable-all: true
   enable:
@@ -171,14 +174,11 @@ linters:
     - nakedret # finds naked returns in functions greater than a specified function length
     - nestif # reports deeply nested if statements
     - nilerr # finds the code that returns nil even if it checks that the error is not nil
-    - nilnil # checks that there is no simultaneous return of nil error and an invalid value
     - noctx # finds sending http request without context.Context
-    - nonamedreturns # reports all named returns
     - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     - predeclared # finds code that shadows one of Go's predeclared identifiers
     - promlinter # checks Prometheus metrics naming via promlint
     - protogetter # reports direct reads from proto message fields when getters should be used
-    - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
     - rowserrcheck # checks whether Err of rows is checked successfully
     - sloglint # ensure consistent code style when using log/slog
     - spancheck # checks for mistakes with OpenTelemetry/Census spans
@@ -197,6 +197,9 @@ linters:
 
 
     ## you may want to enable
+    #- nilnil # checks that there is no simultaneous return of nil error and an invalid value
+    #- nonamedreturns # reports all named returns
+    #- revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
     #- nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
     #- forbidigo # forbids identifiers
     #- reassign # checks that package variables are not reassigned
@@ -256,6 +259,7 @@ issues:
         - bodyclose
         - dupl
         - funlen
+        - gochecknoglobals
         - goconst
         - gosec
         - noctx

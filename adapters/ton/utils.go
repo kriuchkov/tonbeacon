@@ -81,7 +81,7 @@ func MakeJettonTransferMessage(
 	destination, responseDest *address.Address,
 	amount *big.Int,
 	forwardAmount tlb.Coins,
-	queryId int64,
+	queryID int64,
 	comment string,
 	binaryComment string,
 ) (*cell.Cell, error) {
@@ -90,11 +90,13 @@ func MakeJettonTransferMessage(
 	forwardPayload := cell.BeginCell().EndCell()
 
 	if binaryComment != "" {
-		c, err := decodeBinaryComment(binaryComment)
+		var cell *cell.Cell
+		cell, err = decodeBinaryComment(binaryComment)
 		if err != nil {
-			log.Fatalf("decode binary comment error : %s", err.Error())
+			return nil, errors.Wrap(err, "decode binary comment")
 		}
-		forwardPayload = c
+
+		forwardPayload = cell
 	} else if comment != "" {
 		forwardPayload, err = buildComment(comment)
 		if err != nil {
@@ -103,7 +105,7 @@ func MakeJettonTransferMessage(
 	}
 
 	payload, err := tlb.ToCell(jetton.TransferPayload{
-		QueryID:             uint64(queryId),
+		QueryID:             uint64(queryID),
 		Amount:              tlb.FromNanoTON(amount),
 		Destination:         destination,
 		ResponseDestination: responseDest,
