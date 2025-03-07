@@ -11,6 +11,7 @@ import (
 	"github.com/xssnick/tonutils-go/address"
 	"github.com/xssnick/tonutils-go/tlb"
 	"github.com/xssnick/tonutils-go/ton/wallet"
+	"github.com/xssnick/tonutils-go/tvm/cell"
 
 	"github.com/kriuchkov/tonbeacon/core/model"
 	"github.com/kriuchkov/tonbeacon/core/ports"
@@ -65,10 +66,11 @@ func (w *WalletAdapter) GetExtraCurrenciesBalance(ctx context.Context, walletID 
 	log.Debug().Any("account", account).Msg("account")
 
 	if account.IsActive && account.State != nil {
-		currencies, err := account.State.ExtraCurrencies.LoadAll()
-		if err != nil {
+		var currencies []cell.DictKV
+		if currencies, err = account.State.ExtraCurrencies.LoadAll(); err != nil {
 			return nil, errors.Wrap(err, "load currencies")
 		}
+
 		log.Debug().Any("currencies", currencies).Msg("currencies")
 
 		balances := make([]model.Balance, 0, len(currencies))
@@ -147,7 +149,7 @@ func (w *WalletAdapter) TransferToMainWallet(ctx context.Context, walletID uint3
 	}
 
 	coinAmount := tlb.MustFromNano(big.NewInt(int64(amount)), 0)
-	if err := subwallet.TransferNoBounce(ctx, w.masterWallet.WalletAddress(), coinAmount, ""); err != nil {
+	if err = subwallet.TransferNoBounce(ctx, w.masterWallet.WalletAddress(), coinAmount, ""); err != nil {
 		return errors.Wrap(err, "transfer funds to main wallet")
 	}
 

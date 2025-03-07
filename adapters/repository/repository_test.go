@@ -45,7 +45,7 @@ func setupTestDB(t *testing.T) *bun.DB {
 	})
 	require.NoError(t, err)
 
-	t.Cleanup(func() { err := pgC.Terminate(ctx); require.NoError(t, err) })
+	t.Cleanup(func() { errClose := pgC.Terminate(ctx); require.NoError(t, errClose) })
 
 	host, err := pgC.Host(ctx)
 	require.NoError(t, err)

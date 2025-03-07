@@ -8,8 +8,9 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/go-faster/errors"
 	"github.com/go-playground/validator/v10"
-	"github.com/kriuchkov/tonbeacon/core/ports"
 	"github.com/rs/zerolog/log"
+
+	"github.com/kriuchkov/tonbeacon/core/ports"
 )
 
 var _ ports.PublisherPort = (*KafkaPublisher)(nil)
@@ -56,7 +57,7 @@ func NewKafkaPublisher(opt *KafkaOptions) (*KafkaPublisher, error) {
 	return &KafkaPublisher{producer: producer, topic: opt.Topic}, nil
 }
 
-func (p *KafkaPublisher) Publish(ctx context.Context, message any) error {
+func (p *KafkaPublisher) Publish(_ context.Context, message any) error {
 	data, err := json.Marshal(message)
 	if err != nil {
 		return errors.Wrap(err, "json marshal")

@@ -2,7 +2,6 @@ package ton
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"math/big"
 	"math/rand"
@@ -51,7 +50,7 @@ func JettonsTransfer(
 	comment string,
 ) error {
 	if from == nil || to == nil || to.Address() == nil {
-		return fmt.Errorf("nil wallet")
+		return errors.New("nil wallet")
 	}
 	body, err := MakeJettonTransferMessage(to.Address(), to.Address(), amount.BigInt(), forwardAmount, rand.Int63(), comment, "")
 	if err != nil {
@@ -82,7 +81,7 @@ func MakeJettonTransferMessage(
 	destination, responseDest *address.Address,
 	amount *big.Int,
 	forwardAmount tlb.Coins,
-	queryId int64,
+	queryID int64,
 	comment string,
 	binaryComment string,
 ) (*cell.Cell, error) {
@@ -91,11 +90,13 @@ func MakeJettonTransferMessage(
 	forwardPayload := cell.BeginCell().EndCell()
 
 	if binaryComment != "" {
-		c, err := decodeBinaryComment(binaryComment)
+		var cell *cell.Cell
+		cell, err = decodeBinaryComment(binaryComment)
 		if err != nil {
-			log.Fatalf("decode binary comment error : %s", err.Error())
+			return nil, errors.Wrap(err, "decode binary comment")
 		}
-		forwardPayload = c
+
+		forwardPayload = cell
 	} else if comment != "" {
 		forwardPayload, err = buildComment(comment)
 		if err != nil {
@@ -104,7 +105,7 @@ func MakeJettonTransferMessage(
 	}
 
 	payload, err := tlb.ToCell(jetton.TransferPayload{
-		QueryID:             uint64(queryId),
+		QueryID:             uint64(queryID),
 		Amount:              tlb.FromNanoTON(amount),
 		Destination:         destination,
 		ResponseDestination: responseDest,
@@ -121,28 +122,5 @@ func MakeJettonTransferMessage(
 }
 
 func decodeBinaryComment(comment string) (*cell.Cell, error) {
-
-	/* bitString, err := boc.BitStringFromFiftHex(comment)
-	if err != nil {
-		return nil, err
-	}
-
-	c := boc.NewCell()
-	err = c.WriteUint(0xb3ddcf7d, 32) // binary_comment#b3ddcf7d
-	if err != nil {
-		return nil, err
-	} */
-
-	/* err = tongoTlb.Marshal(c, tongoTlb.SnakeData(*bitString))
-	if err != nil {
-		return nil, err
-	} */
-
-	/* 	b, err := c.ToBoc()
-	   	if err != nil {
-	   		return nil, err
-	   	} */
-
-	/* return cell.FromBOC(b) */
 	return nil, nil
 }

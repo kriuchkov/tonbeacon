@@ -44,7 +44,7 @@ func fromModelAccount(account *model.Account) *Account {
 type OutboxEvent struct {
 	bun.BaseModel `bun:"table:outbox_events"`
 
-	ID        uint64    `bun:"id,pk"`
+	ID        int64     `bun:"id,pk"`
 	EventType string    `bun:"event_type"`
 	Payload   string    `bun:"payload"`
 	CreatedAt time.Time `bun:"created_at"`
@@ -53,7 +53,7 @@ type OutboxEvent struct {
 
 func (e *OutboxEvent) toModel() model.OutboxEvent {
 	return model.OutboxEvent{
-		ID:        int64(e.ID),
+		ID:        e.ID,
 		EventType: model.EventType(e.EventType),
 		Payload:   []byte(e.Payload),
 		CreatedAt: e.CreatedAt,
@@ -63,7 +63,7 @@ func (e *OutboxEvent) toModel() model.OutboxEvent {
 
 func fromModelOutboxEvent(event model.OutboxEvent) *OutboxEvent {
 	return &OutboxEvent{
-		ID:        uint64(event.ID),
+		ID:        event.ID,
 		EventType: string(event.EventType),
 		Payload:   string(event.Payload),
 		CreatedAt: event.CreatedAt,

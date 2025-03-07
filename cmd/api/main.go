@@ -33,7 +33,7 @@ func main() {
 
 	db := bun.NewDB(sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(cfg.Database.DSN()))), pgdialect.New())
 
-	if err := db.PingContext(ctx); err != nil {
+	if err = db.PingContext(ctx); err != nil {
 		log.Panic().Err(err).Msg("db connection")
 	}
 
@@ -41,7 +41,7 @@ func main() {
 
 	client := liteclientutils.NewConnectionPool()
 
-	if err := client.AddConnectionsFromConfigUrl(ctx, "https://tonutils.com/testnet-global.config.json"); err != nil {
+	if err = client.AddConnectionsFromConfigUrl(ctx, "https://tonutils.com/testnet-global.config.json"); err != nil {
 		log.Panic().Err(err).Msg("liteclient connection")
 	}
 
@@ -68,12 +68,11 @@ func main() {
 
 	go func() {
 		grpcServer := grpc.NewTonBeacon(accountSvc)
-		if err := grpcServer.Run(lis); err != nil {
+		if err = grpcServer.Run(lis); err != nil {
 			log.Panic().Err(err).Msg("grpc server run")
 		}
 	}()
 
 	<-ctx.Done()
-
 	log.Info().Msg("shutting down")
 }

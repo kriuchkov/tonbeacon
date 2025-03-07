@@ -7,32 +7,38 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"os/signal"
+
+	"github.com/rs/zerolog/log"
+	liteclientutils "github.com/xssnick/tonutils-go/liteclient"
+	tonutils "github.com/xssnick/tonutils-go/ton"
 
 	"github.com/kriuchkov/tonbeacon/adapters/publisher"
 	"github.com/kriuchkov/tonbeacon/adapters/ton"
 	"github.com/kriuchkov/tonbeacon/core/ports"
-	"github.com/rs/zerolog/log"
-	liteclientutils "github.com/xssnick/tonutils-go/liteclient"
-	tonutils "github.com/xssnick/tonutils-go/ton"
+
+	_ "net/http/pprof"
 )
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer cancel()
+	defer log.Info().Msg("scanner stopped")
 
 	cfg, err := LoadConfig()
 	if err != nil {
-		log.Panic().Err(err).Msg("config loading")
+		panic(fmt.Sprintf("load config: %s", err))
 	}
 
 	client := liteclientutils.NewConnectionPool()
-	if err := client.AddConnectionsFromConfigUrl(ctx, cfg.Ton.URL); err != nil {
-		log.Panic().Err(err).Msg("liteclient connection")
+	if err = client.AddConnectionsFromConfigUrl(ctx, cfg.Ton.URL); err != nil {
+		panic("liteclient connection")
 	}
+
+	log.Info().Msg("liteclient connected")
 
 	liteClient := tonutils.NewAPIClient(client, tonutils.ProofCheckPolicyFast).WithRetry()
 	scanner := ton.NewScanner(liteClient, &ton.OptionsScanner{
@@ -41,23 +47,31 @@ func main() {
 
 	publisher, err := setPublisher(cfg)
 	if err != nil {
-		log.Panic().Err(err).Msg("failed to create publisher")
+		panic(fmt.Sprintf("set publisher: %s", err))
 	}
 	defer publisher.Close()
 
+	log.Info().Any("type", cfg.PublisherType).Msg("publisher created")
+
 	resultsCh := make(chan any, 1000)
-	if err := scanner.RunAsync(ctx, resultsCh); err != nil {
-		log.Panic().Err(err).Msg("run scanner")
+	if err = scanner.RunAsync(ctx, resultsCh); err != nil {
+		panic(fmt.Sprintf("scanner run: %s", err))
 	}
 
-	go func() { http.ListenAndServe("localhost:6060", nil) }()
+	if cfg.PPROF != "" {
+		go func() {
+			if err := http.ListenAndServe(cfg.PPROF, nil); err != nil {
+				log.Error().Err(err).Msg("pprof server")
+			}
+		}()
+	}
 
 	log.Info().Msg("scanner started")
 	for {
 		select {
 		case result := <-resultsCh:
-			if err := publisher.Publish(ctx, result); err != nil {
-				log.Error().Err(err).Msg("failed to publish message")
+			if err = publisher.Publish(ctx, result); err != nil {
+				log.Error().Err(err).Msg("publish message")
 			}
 		case <-ctx.Done():
 			return
@@ -90,6 +104,8 @@ func setPublisher(cfg *Config) (ports.PublisherPort, error) {
 			RequiredAcks: cfg.Kafka.RequiredAcks,
 			MaxRetries:   cfg.Kafka.MaxRetries,
 		})
+	case NoopPublisherType:
+		return &publisher.NoopPublisher{}, nil
 	default:
 		return &publisher.NoopPublisher{}, nil
 	}

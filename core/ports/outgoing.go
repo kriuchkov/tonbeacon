@@ -44,7 +44,7 @@ type (
 
 	OutboxMessageDatabasePort interface {
 		SaveEvent(ctx context.Context, event model.OutboxEvent) error
-		GetEvents(ctx context.Context, limit uint64) ([]model.OutboxEvent, error)
+		GetEvents(ctx context.Context, limit int64) ([]model.OutboxEvent, error)
 		MarkEventAsProcessed(ctx context.Context, eventID uint64) error
 	}
 

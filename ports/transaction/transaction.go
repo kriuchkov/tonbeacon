@@ -7,13 +7,15 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-playground/validator/v10"
-	"github.com/kriuchkov/tonbeacon/core/model"
-	"github.com/kriuchkov/tonbeacon/core/ports"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/lo"
+
+	"github.com/kriuchkov/tonbeacon/core/model"
+	"github.com/kriuchkov/tonbeacon/core/ports"
 )
 
 const (
+	// defaultUpdateInterval is the default interval for updating accounts.
 	defaultUpdateInterval = 5 * time.Second
 )
 
@@ -55,7 +57,14 @@ func New(ctx context.Context, opts *Options) *Transaction {
 	}
 
 	done := make(chan struct{})
-	go t.update(ctx, done)
+	defer close(done)
+
+	go func() {
+		if err := t.update(ctx, done); err != nil {
+			log.Error().Err(err).Msg("update")
+		}
+	}()
+
 	<-done
 	return t
 }
@@ -119,7 +128,7 @@ func (t *Transaction) Handle(ctx context.Context, message []byte) error {
 		Msg("processing relevant transaction")
 
 	err = t.txPort.WithInTransaction(ctx, func(ctx context.Context) error {
-		if _, err := t.transaction.InsertTransaction(ctx, &tx); err != nil {
+		if _, err = t.transaction.InsertTransaction(ctx, &tx); err != nil {
 			return errors.Wrap(err, "save tx")
 		}
 		return nil

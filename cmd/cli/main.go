@@ -19,7 +19,7 @@ func main() {
 		Use:   "generate-seed",
 		Short: "Generate a new seed phrase (mnemonic)",
 		Long:  "Generate a new cryptographically secure random seed phrase with specified number of words",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, args []string) {
 			phrase := walletutils.NewSeed()
 			fmt.Println("Your seed phrase:")
 			fmt.Println(phrase)

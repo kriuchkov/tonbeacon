@@ -5,17 +5,15 @@ import (
 	"math"
 	"testing"
 
-	tonadapter "github.com/kriuchkov/tonbeacon/adapters/ton"
 	"github.com/stretchr/testify/suite"
-
 	liteclientutils "github.com/xssnick/tonutils-go/liteclient"
 	tonutils "github.com/xssnick/tonutils-go/ton"
 	walletutils "github.com/xssnick/tonutils-go/ton/wallet"
+
+	tonadapter "github.com/kriuchkov/tonbeacon/adapters/ton"
 )
 
-const (
-	testConfigUrl = "https://tonutils.com/testnet-global.config.json"
-)
+var testConfigURL = "https://tonutils.com/testnet-global.config.json"
 
 type WalletManagerTestSuite struct {
 	suite.Suite
@@ -28,7 +26,7 @@ func (suite *WalletManagerTestSuite) SetupTest() {
 
 	client := liteclientutils.NewConnectionPool()
 
-	err := client.AddConnectionsFromConfigUrl(ctx, testConfigUrl)
+	err := client.AddConnectionsFromConfigUrl(ctx, testConfigURL)
 	suite.Require().NoError(err)
 
 	seed := walletutils.NewSeed()
