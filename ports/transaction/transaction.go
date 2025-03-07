@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -20,7 +21,7 @@ const (
 )
 
 type Options struct {
-	AccountPort     ports.AccountDatabasePort       `required:"true"`
+	DatabasePort    ports.AccountDatabasePort       `required:"true"`
 	TxPort          ports.DatabaseTransactionPort   `required:"true"`
 	TransactionPort ports.TransactionalDatabasePort `required:"true"`
 	Interval        time.Duration
@@ -39,17 +40,17 @@ type Transaction struct {
 
 	// ports
 	txPort      ports.DatabaseTransactionPort
-	accountPort ports.AccountDatabasePort
+	dbPort      ports.AccountDatabasePort
 	transaction ports.TransactionalDatabasePort
 }
 
 func New(ctx context.Context, opts *Options) *Transaction {
 	if err := validator.New().Struct(opts); err != nil {
-		log.Panic().Err(err).Msg("transaction invalid options")
+		panic(err.Error())
 	}
 
 	t := &Transaction{
-		accountPort: opts.AccountPort,
+		dbPort:      opts.DatabasePort,
 		txPort:      opts.TxPort,
 		transaction: opts.TransactionPort,
 		accountList: make(map[model.Address]*model.Account),
@@ -92,7 +93,7 @@ func (t *Transaction) update(ctx context.Context, ch chan struct{}) error {
 }
 
 func (t *Transaction) updateAccounts(ctx context.Context) error {
-	accountList, err := t.accountPort.ListAccounts(ctx, model.ListAccountFilter{IsClosed: lo.ToPtr(false)})
+	accountList, err := t.dbPort.ListAccounts(ctx, model.ListAccountFilter{IsClosed: lo.ToPtr(false)})
 	if err != nil {
 		return errors.Wrap(err, "list accounts")
 	}
@@ -119,6 +120,8 @@ func (t *Transaction) Handle(ctx context.Context, message []byte) error {
 		t.accountList[model.Address(tx.Receiver)],
 	}
 
+	fmt.Println(tx)
+
 	if ok := lo.ContainsBy(accounts, func(i *model.Account) bool { return i != nil }); !ok {
 		return model.ErrAccountNotFound
 	}
@@ -128,7 +131,7 @@ func (t *Transaction) Handle(ctx context.Context, message []byte) error {
 		Msg("processing relevant transaction")
 
 	err = t.txPort.WithInTransaction(ctx, func(ctx context.Context) error {
-		if _, err = t.transaction.InsertTransaction(ctx, &tx); err != nil {
+		if _, err = t.transaction.InsertTransaction(ctx, tx); err != nil {
 			return errors.Wrap(err, "save tx")
 		}
 		return nil

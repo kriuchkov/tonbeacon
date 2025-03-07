@@ -11,34 +11,30 @@ type KafkaHandler interface {
 	Handle(ctx context.Context, message []byte) error
 }
 
-type KafkaConsumerOptions struct {
-	Brokers      []string
-	Topic        string
-	GroupID      string
-	Handler      KafkaHandler
-	SaramaConfig *sarama.Config
+type KafkaOptions struct {
+	Brokers []string
+	Topic   string
+	GroupID string
+	Handler KafkaHandler
 }
 
-type KafkaConsumer struct {
+type Kafka struct {
 	consumer sarama.ConsumerGroup
 	handler  KafkaHandler
 	topic    string
 }
 
-func NewKafkaConsumer(opts KafkaConsumerOptions) *KafkaConsumer {
-	consumer, err := sarama.NewConsumerGroup(opts.Brokers, opts.GroupID, opts.SaramaConfig)
+func NewKafka(opts KafkaOptions) *Kafka {
+	cfg := sarama.NewConfig()
+	consumer, err := sarama.NewConsumerGroup(opts.Brokers, opts.GroupID, cfg)
 	if err != nil {
-		log.Panic().Err(err).Msg("failed to create Kafka consumer")
+		panic(err.Error())
 	}
 
-	return &KafkaConsumer{
-		consumer: consumer,
-		handler:  opts.Handler,
-		topic:    opts.Topic,
-	}
+	return &Kafka{consumer: consumer, handler: opts.Handler, topic: opts.Topic}
 }
 
-func (c *KafkaConsumer) Consume(ctx context.Context) {
+func (c *Kafka) Consume(ctx context.Context) {
 	go func() {
 		for err := range c.consumer.Errors() {
 			log.Error().Err(err).Msg("kafka consumer error")
@@ -59,7 +55,7 @@ func (c *KafkaConsumer) Consume(ctx context.Context) {
 	}
 }
 
-func (c *KafkaConsumer) Close() error {
+func (c *Kafka) Close() error {
 	return c.consumer.Close()
 }
 
@@ -75,19 +71,14 @@ func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 		}
 
 		log.Debug().
-			Str("topic", message.Topic).
-			Int32("partition", message.Partition).
-			Int64("offset", message.Offset).
+			Str("topic", message.Topic).Int32("partition", message.Partition).Int64("offset", message.Offset).
 			Msg("received message")
 
 		if err := h.handler.Handle(h.ctx, message.Value); err != nil {
 			log.Error().Err(err).
-				Str("topic", message.Topic).
-				Int32("partition", message.Partition).
-				Int64("offset", message.Offset).
-				Msg("failed to handle message")
+				Str("topic", message.Topic).Int32("partition", message.Partition).Int64("offset", message.Offset).
+				Msg("handle message")
 		} else {
-			// Только если успешно обработали, отмечаем как обработанное
 			session.MarkMessage(message, "")
 		}
 	}
@@ -96,3 +87,10 @@ func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 
 func (h *consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (h *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+
+type StdOutHandler struct{}
+
+func (h *StdOutHandler) Handle(_ context.Context, message []byte) error {
+	log.Info().Bytes("message", message).Msg("received message")
+	return nil
+}
