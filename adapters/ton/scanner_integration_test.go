@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kriuchkov/tonbeacon/adapters/ton"
 	"github.com/stretchr/testify/suite"
 	liteclientutils "github.com/xssnick/tonutils-go/liteclient"
 	tonutils "github.com/xssnick/tonutils-go/ton"
+
+	"github.com/kriuchkov/tonbeacon/adapters/ton"
 )
 
 type ScannerTestSuite struct {

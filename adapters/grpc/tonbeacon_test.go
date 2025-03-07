@@ -16,7 +16,6 @@ import (
 )
 
 func TestTonBeacon_CreateAccount(t *testing.T) {
-
 	type mockAccountServiceCall struct {
 		calls           int
 		accountID       string

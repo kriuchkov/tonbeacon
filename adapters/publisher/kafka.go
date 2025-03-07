@@ -8,8 +8,9 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/go-faster/errors"
 	"github.com/go-playground/validator/v10"
-	"github.com/kriuchkov/tonbeacon/core/ports"
 	"github.com/rs/zerolog/log"
+
+	"github.com/kriuchkov/tonbeacon/core/ports"
 )
 
 var _ ports.PublisherPort = (*KafkaPublisher)(nil)

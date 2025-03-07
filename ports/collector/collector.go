@@ -5,9 +5,10 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/rs/zerolog/log"
+
 	"github.com/kriuchkov/tonbeacon/core/model"
 	"github.com/kriuchkov/tonbeacon/core/ports"
-	"github.com/rs/zerolog/log"
 )
 
 const defaultCollectInterval = 10 * time.Millisecond

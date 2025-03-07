@@ -5,12 +5,12 @@ import (
 	"math"
 	"testing"
 
-	tonadapter "github.com/kriuchkov/tonbeacon/adapters/ton"
 	"github.com/stretchr/testify/suite"
-
 	liteclientutils "github.com/xssnick/tonutils-go/liteclient"
 	tonutils "github.com/xssnick/tonutils-go/ton"
 	walletutils "github.com/xssnick/tonutils-go/ton/wallet"
+
+	tonadapter "github.com/kriuchkov/tonbeacon/adapters/ton"
 )
 
 const (

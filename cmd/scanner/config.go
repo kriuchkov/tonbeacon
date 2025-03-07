@@ -1,3 +1,4 @@
+//nolint:errcheck
 package main
 
 import (
@@ -29,7 +30,7 @@ const (
 	// defaultScanningNumWorkers is the default number of workers for scanning.
 	defaultScanningNumWorkers = 1
 
-	//defaultPublisherType is the default publisher type.
+	// defaultPublisherType is the default publisher type.
 	defaultPublisherType = StdoutPublisherType
 )
 

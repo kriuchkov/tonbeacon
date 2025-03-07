@@ -9,16 +9,18 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"os/signal"
+
+	"github.com/rs/zerolog/log"
+	liteclientutils "github.com/xssnick/tonutils-go/liteclient"
+	tonutils "github.com/xssnick/tonutils-go/ton"
 
 	"github.com/kriuchkov/tonbeacon/adapters/publisher"
 	"github.com/kriuchkov/tonbeacon/adapters/ton"
 	"github.com/kriuchkov/tonbeacon/core/ports"
-	"github.com/rs/zerolog/log"
-	liteclientutils "github.com/xssnick/tonutils-go/liteclient"
-	tonutils "github.com/xssnick/tonutils-go/ton"
+
+	_ "net/http/pprof"
 )
 
 func main() {

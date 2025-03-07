@@ -1,11 +1,11 @@
 package ton
 
 import (
+	"github.com/shopspring/decimal"
 	"github.com/xssnick/tonutils-go/ton"
 	"github.com/xssnick/tonutils-go/ton/wallet"
 
 	"github.com/kriuchkov/tonbeacon/core/model"
-	"github.com/shopspring/decimal"
 )
 
 var _ model.WalletWrapper = &TonWallet{}

@@ -96,20 +96,20 @@ func (s *TonBeacon) ListAccounts(ctx context.Context, req *pb.ListAccountsReques
 	log.Debug().Msg("list accounts")
 
 	var filter model.ListAccountFilter
-	if len(req.WalletIds) > 0 {
-		filter.WalletIDs = lo.ToPtr(req.WalletIds)
+	if len(req.GetWalletIds()) > 0 {
+		filter.WalletIDs = lo.ToPtr(req.GetWalletIds())
 	}
 
 	if req.IsActive != nil {
 		filter.IsClosed = lo.ToPtr(false)
 	}
 
-	filter.Offset = int(req.Offset)
+	filter.Offset = int(req.GetOffset())
 
-	if req.Limit == 0 || req.Limit > 1000 {
+	if req.GetLimit() == 0 || req.GetLimit() > 1000 {
 		req.Limit = 1000
 	}
-	filter.Limit = int(req.Limit)
+	filter.Limit = int(req.GetLimit())
 
 	accounts, err := s.accountSvc.ListAccounts(ctx, filter)
 	if err != nil {

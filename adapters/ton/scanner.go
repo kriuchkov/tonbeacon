@@ -7,11 +7,10 @@ package ton
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"slices"
 
 	"github.com/go-faster/errors"
 	"github.com/rs/zerolog/log"
@@ -152,7 +151,7 @@ func (v *Scanner) RunAsync(ctx context.Context, ch chan<- any) error {
 }
 
 func (v *Scanner) accFetcherWorker(ch chan<- any, threads int) {
-	for y := 0; y < threads; y++ {
+	for range threads {
 		go func() {
 			for {
 				task := <-v.taskPool
@@ -238,7 +237,7 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 		select {
 		case <-ctx.Done():
 			log.Warn().Uint32("master", master.SeqNo).Msg("ctx done")
-			return
+			return transactionsNum, shardBlocksNum
 		default:
 		}
 
@@ -268,7 +267,7 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 				select {
 				case <-ctx.Done():
 					log.Warn().Uint32("master", master.SeqNo).Msg("ctx done")
-					return
+					return transactionsNum, shardBlocksNum
 				default:
 				}
 
@@ -299,7 +298,7 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 				var block *tlbutils.Block
 				{
 					ctx := ctx
-					for z := 0; z < 20; z++ {
+					for range 20 {
 						ctx, err = v.api.Client().StickyContextNextNode(ctx)
 						if err != nil {
 							log.Debug().Err(err).Uint32("master", master.SeqNo).Int64("shard", shard.Shard).
@@ -322,7 +321,7 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 
 				err = func() error {
 					if block == nil {
-						return fmt.Errorf("failed to fetch block")
+						return errors.New("failed to fetch block")
 					}
 
 					shr := block.Extra.ShardAccountBlocks.BeginParse()
@@ -387,6 +386,6 @@ func (v *Scanner) fetchBlock(ctx context.Context, master *tonutils.BlockIDExt) (
 		}
 
 		shardsWg.Wait()
-		return
+		return transactionsNum, shardBlocksNum
 	}
 }

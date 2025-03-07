@@ -2,7 +2,6 @@ package ton
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"math/big"
 	"math/rand"
@@ -51,7 +50,7 @@ func JettonsTransfer(
 	comment string,
 ) error {
 	if from == nil || to == nil || to.Address() == nil {
-		return fmt.Errorf("nil wallet")
+		return errors.New("nil wallet")
 	}
 	body, err := MakeJettonTransferMessage(to.Address(), to.Address(), amount.BigInt(), forwardAmount, rand.Int63(), comment, "")
 	if err != nil {
