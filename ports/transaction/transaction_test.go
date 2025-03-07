@@ -138,6 +138,7 @@ func TestTransaction_UpdateAccounts(t *testing.T) {
 		})
 	}
 }
+
 func TestTransaction_Handle(t *testing.T) {
 	t.Parallel()
 
@@ -249,9 +250,10 @@ func TestTransaction_Handle(t *testing.T) {
 		}`)
 
 	type mockInsertTransactionCall struct {
-		calls       int
-		tx          *model.Transaction
-		expectError error
+		calls         int
+		tx            *model.Transaction
+		responseTx    *model.Transaction
+		responseError error
 	}
 
 	tests := []struct {
@@ -266,11 +268,20 @@ func TestTransaction_Handle(t *testing.T) {
 			name:    "successful",
 			message: testTransactionMsg,
 			accountList: map[model.Address]*model.Account{
-				"EQDNoXNKSXRvOzh3lpUcaeiQY1dxzG6wE6uYn_Cwoh80iIMp": {ID: "1", WalletID: 1, Address: "EQDNoXNKSXRvOzh3lpUcaeiQY1dxzG6wE6uYn_Cwoh80iIMp"},
+				"EQDNoXNKSXRvOzh3lpUcaeiQY1dxzG6wE6uYn_Cwoh80iIMp": {
+					ID:       "1",
+					WalletID: 1,
+					Address:  "EQDNoXNKSXRvOzh3lpUcaeiQY1dxzG6wE6uYn_Cwoh80iIMp",
+				},
 			},
 			mockInsertTransactionCall: mockInsertTransactionCall{
 				calls: 1,
-				tx:    &model.Transaction{ID: "tx1", Sender: "EQDNoXNKSXRvOzh3lpUcaeiQY1dxzG6wE6uYn_Cwoh80iIMp", Receiver: "EQDXfHeRvIZwfxO3bjZl8jbUh2h0fV_Zzy_F5EErQcVHyz3R", Amount: 100},
+				tx: &model.Transaction{
+					ID:       "tx1",
+					Sender:   "EQDNoXNKSXRvOzh3lpUcaeiQY1dxzG6wE6uYn_Cwoh80iIMp",
+					Receiver: "EQDXfHeRvIZwfxO3bjZl8jbUh2h0fV_Zzy_F5EErQcVHyz3R",
+					Amount:   100,
+				},
 			},
 		},
 	}
@@ -281,17 +292,20 @@ func TestTransaction_Handle(t *testing.T) {
 
 			ctx := context.Background()
 
+			// TxPort mock
+			txPort := portsmocks.NewMockDatabaseTransactionPort(t)
+			txPort.On("WithInTransaction", ctx, mock.Anything).
+				Return(func(ctx context.Context, fn func(ctx context.Context) error) error { return fn(ctx) })
+
 			// TransactionPort mock
 			transactionPort := portsmocks.NewMockTransactionalDatabasePort(t)
 			if tt.mockInsertTransactionCall.calls > 0 {
 				param := tt.mockInsertTransactionCall
-				transactionPort.On("InsertTransaction", ctx, param.tx).Return(param.expectError).Times(param.calls)
-			}
 
-			txPort := portsmocks.NewMockDatabaseTransactionPort(t)
-			txPort.On("WithInTransaction", ctx, mock.Anything).Return(func(ctx context.Context, fn func(ctx context.Context) error) error {
-				return fn(ctx)
-			})
+				// TODO: fix mock.Anything
+				transactionPort.On("InsertTransaction", ctx, mock.Anything).
+					Return(param.responseTx, param.responseError).Times(param.calls)
+			}
 
 			transaction := &Transaction{
 				dbPort:      portsmocks.NewMockDatabasePort(t),

@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -120,15 +119,11 @@ func (t *Transaction) Handle(ctx context.Context, message []byte) error {
 		t.accountList[model.Address(tx.Receiver)],
 	}
 
-	fmt.Println(tx)
-
 	if ok := lo.ContainsBy(accounts, func(i *model.Account) bool { return i != nil }); !ok {
 		return model.ErrAccountNotFound
 	}
 
-	log.Debug().
-		Str("sender", tx.Sender).Str("receiver", tx.Receiver).Str("txid", tx.ID).Float64("amount", tx.Amount).
-		Msg("processing relevant transaction")
+	log.Debug().Any("tx", tx).Msg("processing relevant transaction")
 
 	err = t.txPort.WithInTransaction(ctx, func(ctx context.Context) error {
 		if _, err = t.transaction.InsertTransaction(ctx, tx); err != nil {
