@@ -18,6 +18,7 @@ require (
 	github.com/uptrace/bun/dialect/pgdialect v1.2.10
 	github.com/uptrace/bun/driver/pgdriver v1.2.10
 	github.com/uptrace/bun/extra/bundebug v1.2.10
+	github.com/valyala/fastjson v1.6.4
 	github.com/xssnick/tonutils-go v1.11.1
 	golang.org/x/sync v0.11.0
 	google.golang.org/grpc v1.70.0

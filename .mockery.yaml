@@ -10,6 +10,7 @@ packages:
       WalletPort:
       DatabasePort:
       DatabaseTransactionPort:
+      TransactionalDatabasePort:
       OutboxMessagePort:
       AccountServicePort:
       
