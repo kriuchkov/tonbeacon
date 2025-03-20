@@ -88,6 +88,5 @@ func setupKafkaConsumer(ctx context.Context, cfg *Config) (*consumer.Kafka, erro
 		GroupID: cfg.Kafka.GroupID,
 		Handler: &consumer.StdOutHandler{},
 	})
-
 	return kafkaConsumer, nil
 }

@@ -10,11 +10,10 @@ import (
 
 type Transaction struct {
 	// Transaction identifiers
-	ID         string // Transaction identifier (AccountAddr or LT)
-	Hash       string // Transaction hash
-	LT         int64  // Logical time
-	PrevTxHash string // Previous transaction hash
-	PrevTxLT   int64  // Previous transaction logical time
+	AccountAddr string // Transaction identifier (AccountAddr or LT)
+	LT          int64  // Logical time
+	PrevTxHash  string // Previous transaction hash
+	PrevTxLT    int64  // Previous transaction logical time
 
 	// Address information
 	Sender         string // Source address
@@ -45,10 +44,6 @@ type Transaction struct {
 
 }
 
-func (t *Transaction) Key() string {
-	return fmt.Sprintf("%s:%d", t.Hash, t.LT)
-}
-
 func UnmarshalTransaction(data []byte) (*Transaction, error) {
 	var p fastjson.Parser
 
@@ -61,7 +56,7 @@ func UnmarshalTransaction(data []byte) (*Transaction, error) {
 
 	// Transaction identifiers
 	if accountAddr := v.GetStringBytes("AccountAddr"); accountAddr != nil {
-		tx.ID = string(accountAddr)
+		tx.AccountAddr = string(accountAddr)
 	}
 
 	if lt := v.GetInt64("LT"); lt != 0 {

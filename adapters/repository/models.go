@@ -86,7 +86,7 @@ type Transaction struct {
 
 func (t *Transaction) toModel() *model.Transaction {
 	return &model.Transaction{
-		ID:             t.ID,
+		AccountAddr:    t.ID,
 		Sender:         t.Sender,
 		Receiver:       t.Receiver,
 		Amount:         t.Amount,
@@ -99,7 +99,7 @@ func (t *Transaction) toModel() *model.Transaction {
 
 func fromModelTransaction(transaction *model.Transaction) *Transaction {
 	return &Transaction{
-		ID:             transaction.ID,
+		ID:             transaction.AccountAddr,
 		Sender:         transaction.Sender,
 		Receiver:       transaction.Receiver,
 		Amount:         transaction.Amount,

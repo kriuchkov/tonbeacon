@@ -277,10 +277,10 @@ func TestTransaction_Handle(t *testing.T) {
 			mockInsertTransactionCall: mockInsertTransactionCall{
 				calls: 1,
 				tx: &model.Transaction{
-					ID:       "tx1",
-					Sender:   "EQDNoXNKSXRvOzh3lpUcaeiQY1dxzG6wE6uYn_Cwoh80iIMp",
-					Receiver: "EQDXfHeRvIZwfxO3bjZl8jbUh2h0fV_Zzy_F5EErQcVHyz3R",
-					Amount:   100,
+					AccountAddr: "tx1",
+					Sender:      "EQDNoXNKSXRvOzh3lpUcaeiQY1dxzG6wE6uYn_Cwoh80iIMp",
+					Receiver:    "EQDXfHeRvIZwfxO3bjZl8jbUh2h0fV_Zzy_F5EErQcVHyz3R",
+					Amount:      100,
 				},
 			},
 		},
