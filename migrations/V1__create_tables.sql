@@ -5,12 +5,12 @@ CREATE TABLE accounts (
     is_closed BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE TABLE events (
-    id SERIAL PRIMARY KEY,
-    event_type VARCHAR(255) NOT NULL,
-    payload TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    processed BOOLEAN NOT NULL DEFAULT FALSE
+CREATE TABLE outbox_events (
+	id BIGSERIAL PRIMARY KEY,
+	event_type TEXT NOT NULL,
+	payload TEXT NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+	processed BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE transactions (

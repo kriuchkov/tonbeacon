@@ -45,7 +45,7 @@ func (s *Outbox) GetPendingEvent(ctx context.Context) (*model.OutboxEvent, error
 	}
 
 	if len(events) == 0 {
-		return nil, nil
+		return nil, model.ErrNoPendingEvents
 	}
 	return &events[0], nil
 }

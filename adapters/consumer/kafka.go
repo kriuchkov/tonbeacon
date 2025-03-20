@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/IBM/sarama"
+	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 )
 
@@ -12,9 +13,9 @@ type KafkaHandler interface {
 }
 
 type KafkaOptions struct {
-	Brokers []string
-	Topic   string
-	GroupID string
+	Brokers []string `validate:"required"`
+	Topic   string   `validate:"required"`
+	GroupID string   `validate:"required"`
 	Handler KafkaHandler
 }
 
@@ -25,6 +26,10 @@ type Kafka struct {
 }
 
 func NewKafka(opts KafkaOptions) *Kafka {
+	if err := validator.New().Struct(opts); err != nil {
+		panic(err.Error())
+	}
+
 	cfg := sarama.NewConfig()
 	consumer, err := sarama.NewConsumerGroup(opts.Brokers, opts.GroupID, cfg)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 
+	"github.com/kriuchkov/tonbeacon/core/model"
 	"github.com/kriuchkov/tonbeacon/core/ports"
 )
 
@@ -20,9 +21,9 @@ type OutboxWriter interface {
 }
 
 type OutboxOptions struct {
-	OutboxManager ports.OutboxServicePort       `required:"true"`
-	TxManager     ports.DatabaseTransactionPort `required:"true"`
-	Writer        OutboxWriter                  `required:"true"`
+	OutboxManager ports.OutboxServicePort             `validate:"required"`
+	TxManager     ports.DatabaseWithinTransactionPort `validate:"required"`
+	Writer        OutboxWriter                        `validate:"required"`
 	Interval      time.Duration
 }
 
@@ -33,15 +34,17 @@ func (o *OutboxOptions) SetDefaults() {
 }
 
 type Outbox struct {
-	tx        ports.DatabaseTransactionPort
+	tx        ports.DatabaseWithinTransactionPort
 	outboxSvc ports.OutboxServicePort
 	writer    OutboxWriter
 	interval  time.Duration
 }
 
 func NewOutbox(options OutboxOptions) *Outbox {
+	options.SetDefaults()
+
 	if err := validator.New().Struct(options); err != nil {
-		log.Panic().Err(err).Msg("outbox options")
+		panic(err.Error())
 	}
 
 	return &Outbox{
@@ -71,27 +74,29 @@ func (o *Outbox) Consumer(ctx context.Context) {
 }
 
 func (o *Outbox) process(ctx context.Context) error {
-	ctx, err := o.tx.Begin(ctx)
+	err := o.tx.WithInTransaction(ctx, func(ctx context.Context) error {
+		event, err := o.outboxSvc.GetPendingEvent(ctx)
+		if err != nil {
+			if errors.Is(err, model.ErrNoPendingEvents) {
+				return nil
+			}
+
+			return errors.Wrap(err, "get pending event")
+		}
+
+		if _, _, err = o.writer.SendMessage(event.Key(), event.Payload); err != nil {
+			return errors.Wrap(err, "send message")
+		}
+
+		if err = o.outboxSvc.MarkEventAsProcessed(ctx, event.ID); err != nil {
+			return errors.Wrap(err, "mark event as processed")
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		return errors.Wrap(err, "begin transaction")
-	}
-	defer o.tx.Rollback(ctx) //nolint:errcheck // we don't care about rollback errors
-
-	event, err := o.outboxSvc.GetPendingEvent(ctx)
-	if err != nil {
-		return errors.Wrap(err, "get pending event")
-	}
-
-	if _, _, err = o.writer.SendMessage(event.Key(), event.Payload); err != nil {
-		return errors.Wrap(err, "send message")
-	}
-
-	if err = o.outboxSvc.MarkEventAsProcessed(ctx, event.ID); err != nil {
-		return errors.Wrap(err, "mark event as processed")
-	}
-
-	if err = o.tx.Commit(ctx); err != nil {
-		return errors.Wrap(err, "commit transaction")
+		return errors.Wrap(err, "process transaction")
 	}
 	return nil
 }

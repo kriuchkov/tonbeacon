@@ -37,25 +37,56 @@ services:
       - TONBEACON_LOG_LEVEL=debug
       - TONBEACON_PPROF=:6060
       - TONBEACON_ENABLE_KAFKA_CONSUMER=true
-      - TONBEACON_KAFKA_BROKERS=kafka:9092
-      - TONBEACON_KAFKA_TOPIC=ton_transactions
-      - TONBEACON_KAFKA_GROUP_ID=tonbeacon
-      - TONBEACON_KAFKA_CONSUMER_MAX_RETRIES=3
-      - TONBEACON_KAFKA_CONSUMER_REQUIRED_ACKS=1
+      - TONBEACON_KAFKA_CONSUMER_BROKERS=kafka:9092
+      - TONBEACON_KAFKA_CONSUMER_TOPIC=ton_transactions
+      - TONBEACON_KAFKA_CONSUMER_GROUP_ID=tonbeacon
+      - TONBEACON_KAFKA_CONSUMER_CONSUMER_MAX_RETRIES=3
+      - TONBEACON_KAFKA_CONSUMER_CONSUMER_REQUIRED_ACKS=1
     depends_on:
       - scanner
     restart: unless-stopped
-    command: ["./consumer"]
+    command: ["./consumer --outbox-consumer true --kafka-consumer true"]
+
+  postgres:
+    image: postgres:15
+    networks:
+      - tonbeacon-network
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: tonbeacon
+      POSTGRES_PASSWORD: tonbeacon
+      POSTGRES_DB: tonbeacon
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  flyway:
+    image: flyway/flyway:9
+    networks:
+      - tonbeacon-network
+    depends_on:
+      - postgres
+    entrypoint: ["/bin/bash", "-c"]
+    command: >
+      "flyway -url=jdbc:postgresql://postgres:5432/tonbeacon -user=tonbeacon -password=tonbeacon -locations=filesystem:/flyway/sql migrate"
+    volumes:
+      - ./migrations:/flyway/sql
+    restart: "on-failure"
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     networks:
       - tonbeacon-network
+    ports:
+      - "9092:9092"
+      - "19092:19092" 
     environment:
       CLUSTER_ID: MTIzNDU2Nzg5MDEyMzQ1Nj
       KAFKA_BROKER_ID: 1
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:19092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:19092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -63,7 +94,6 @@ services:
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_NODE_ID: 1
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
@@ -101,12 +131,14 @@ services:
        sleep 2;
        done;
        /usr/bin/kafka-topics --create --topic ton_transactions --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1;
+       /usr/bin/kafka-topics --create --topic outbox_events --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1;
        echo 'kafka topic created';
        exit 0"
     restart: "on-failure"
 
 volumes:
   kafka_data:
+  postgres_data:
 
 networks:
   tonbeacon-network:

@@ -8,9 +8,9 @@ import (
 type OutboxEvent struct {
 	ID        int64
 	EventType EventType
-	Payload   []byte // Данные события в JSON
+	Payload   []byte
 	CreatedAt time.Time
-	Processed bool // Флаг обработки
+	Processed bool
 }
 
 func (o OutboxEvent) Key() string {
