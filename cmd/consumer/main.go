@@ -14,6 +14,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/kriuchkov/tonbeacon/adapters/consumer"
+	"github.com/kriuchkov/tonbeacon/adapters/producer"
 	"github.com/kriuchkov/tonbeacon/adapters/repository"
 	"github.com/kriuchkov/tonbeacon/ports/outbox"
 	//"github.com/kriuchkov/tonbeacon/ports/transaction"
@@ -39,10 +40,16 @@ func main() {
 	if cfg.EnableOutboxConsumer {
 		log.Info().Msg("outbox consumer is enabled")
 
-		outboxConsumer, err := setupOutboxConsumer(ctx, cfg)
+		kafkaProducer, err := producer.NewKafkaProducer(producer.ProducerConfig{})
 		if err != nil {
 			panic(err.Error())
 		}
+
+		outboxConsumer, err := setupOutboxConsumer(ctx, cfg, kafkaProducer)
+		if err != nil {
+			panic(err.Error())
+		}
+		defer kafkaProducer.Close() //nolint:errcheck
 
 		eg.Go(func() error { log.Info().Msg("starting outbox consumer"); outboxConsumer.Consumer(ctx); return nil })
 	}
@@ -61,7 +68,7 @@ func main() {
 	eg.Wait()
 }
 
-func setupOutboxConsumer(ctx context.Context, cfg *Config) (*consumer.Outbox, error) {
+func setupOutboxConsumer(ctx context.Context, cfg *Config, writer consumer.OutboxWriter) (*consumer.Outbox, error) {
 	db := bun.NewDB(sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(cfg.Database.DSN()))), pgdialect.New())
 
 	if err := db.PingContext(ctx); err != nil {
@@ -72,10 +79,9 @@ func setupOutboxConsumer(ctx context.Context, cfg *Config) (*consumer.Outbox, er
 
 	outboxConsumer := consumer.NewOutbox(consumer.OutboxOptions{
 		OutboxManager: outboxManager,
-		TxManager:     nil,
-		Writer:        nil,
+		TxManager:     repository.NewTxRepository(db),
+		Writer:        writer,
 	})
-
 	return outboxConsumer, nil
 }
 

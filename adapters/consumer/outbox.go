@@ -7,7 +7,6 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
-	"github.com/segmentio/kafka-go"
 
 	"github.com/kriuchkov/tonbeacon/core/ports"
 )
@@ -16,10 +15,14 @@ const (
 	defaultInterval = 10 * time.Millisecond
 )
 
+type OutboxWriter interface {
+	SendMessage(key string, value []byte) (partition int32, offset int64, err error)
+}
+
 type OutboxOptions struct {
 	OutboxManager ports.OutboxServicePort       `required:"true"`
 	TxManager     ports.DatabaseTransactionPort `required:"true"`
-	Writer        *kafka.Writer                 `required:"true"`
+	Writer        OutboxWriter                  `required:"true"`
 	Interval      time.Duration
 }
 
@@ -32,7 +35,7 @@ func (o *OutboxOptions) SetDefaults() {
 type Outbox struct {
 	tx        ports.DatabaseTransactionPort
 	outboxSvc ports.OutboxServicePort
-	writer    *kafka.Writer
+	writer    OutboxWriter
 	interval  time.Duration
 }
 
@@ -79,8 +82,8 @@ func (o *Outbox) process(ctx context.Context) error {
 		return errors.Wrap(err, "get pending event")
 	}
 
-	if err = o.writer.WriteMessages(ctx, kafka.Message{Key: []byte(event.EventType), Value: event.Payload}); err != nil {
-		return errors.Wrap(err, "write message")
+	if _, _, err = o.writer.SendMessage(event.Key(), event.Payload); err != nil {
+		return errors.Wrap(err, "send message")
 	}
 
 	if err = o.outboxSvc.MarkEventAsProcessed(ctx, event.ID); err != nil {
