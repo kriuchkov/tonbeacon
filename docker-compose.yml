@@ -25,6 +25,28 @@ services:
     restart: unless-stopped
     command: ["./scanner"]
 
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - tonbeacon-network
+    ports:
+      - "6062:6060"    
+    environment:
+      - TONBEACON_LOG_LEVEL=debug
+      - TONBEACON_PPROF=:6060
+      - TONBEACON_ENABLE_KAFKA_CONSUMER=true
+      - TONBEACON_KAFKA_BROKERS=kafka:9092
+      - TONBEACON_KAFKA_TOPIC=ton_transactions
+      - TONBEACON_KAFKA_GROUP_ID=tonbeacon
+      - TONBEACON_KAFKA_CONSUMER_MAX_RETRIES=3
+      - TONBEACON_KAFKA_CONSUMER_REQUIRED_ACKS=1
+    depends_on:
+      - scanner
+    restart: unless-stopped
+    command: ["./consumer"]
+
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     networks:

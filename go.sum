@@ -241,6 +241,8 @@ github.com/uptrace/bun/driver/pgdriver v1.2.10 h1:AM+rkYbil7RU9SGRSWt0Gs+bsGVvnx
 github.com/uptrace/bun/driver/pgdriver v1.2.10/go.mod h1:ghwwywwNPP4xXov49gqMoUe5NoVsp09MEWPEx0QDhB0=
 github.com/uptrace/bun/extra/bundebug v1.2.10 h1:9Ot6fJ1vemrc0qBYp0roJCogTl9den1PAFcYygBiKoc=
 github.com/uptrace/bun/extra/bundebug v1.2.10/go.mod h1:xnuXkwPrC0gNalR2bde8PobgjwXGCo4D9nZoV/2ghzQ=
+github.com/valyala/fastjson v1.6.4 h1:uAUNq9Z6ymTgGhcm0UynUAB6tlbakBrz6CQFax3BXVQ=
+github.com/valyala/fastjson v1.6.4/go.mod h1:CLCAqky6SMuOcxStkYQvblddUtoRxhYMGLrsQns1aXY=
 github.com/vmihailenco/msgpack/v5 v5.4.1 h1:cQriyiUvjTwOHg8QZaPihLWeRAAVoCpE00IUPn0Bjt8=
 github.com/vmihailenco/msgpack/v5 v5.4.1/go.mod h1:GaZTsDaehaPpQVyxrf5mtQlH+pc21PIudVV/E3rRQok=
 github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=
