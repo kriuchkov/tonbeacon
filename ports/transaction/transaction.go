@@ -20,9 +20,9 @@ const (
 )
 
 type Options struct {
-	DatabasePort    ports.AccountDatabasePort       `required:"true"`
-	TxPort          ports.DatabaseTransactionPort   `required:"true"`
-	TransactionPort ports.TransactionalDatabasePort `required:"true"`
+	DatabasePort    ports.AccountDatabasePort       `validate:"required"`
+	TxPort          ports.DatabaseTransactionPort   `validate:"required"`
+	TransactionPort ports.TransactionalDatabasePort `validate:"required"`
 	Interval        time.Duration
 }
 
@@ -44,6 +44,8 @@ type Transaction struct {
 }
 
 func New(ctx context.Context, opts *Options) *Transaction {
+	opts.SetDefaults()
+
 	if err := validator.New().Struct(opts); err != nil {
 		panic(err.Error())
 	}
