@@ -44,7 +44,7 @@ func fromModelAccount(account *model.Account) *Account {
 type OutboxEvent struct {
 	bun.BaseModel `bun:"table:outbox_events"`
 
-	ID        int64     `bun:"id,pk"`
+	ID        int64     `bun:"id,pk,autoincrement"`
 	EventType string    `bun:"event_type"`
 	Payload   string    `bun:"payload"`
 	CreatedAt time.Time `bun:"created_at"`
