@@ -75,7 +75,7 @@ type Transaction struct {
 	bun.BaseModel `bun:"table:transactions"`
 
 	// Transaction identifiers
-	ID          int64  `bun:"id,pk"`
+	ID          int64  `bun:"id,pk,autoincrement"`
 	AccountAddr string `bun:"account_addr"`
 	LT          int64  `bun:"lt"`
 	PrevTxHash  string `bun:"prev_tx_hash"`

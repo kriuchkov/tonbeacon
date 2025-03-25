@@ -14,7 +14,7 @@ CREATE TABLE outbox_events (
 );
 
 CREATE TABLE transactions (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     account_addr TEXT,
     lt BIGINT NOT NULL,
     prev_tx_hash TEXT NOT NULL,
