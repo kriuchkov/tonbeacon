@@ -44,7 +44,7 @@ func fromModelAccount(account *model.Account) *Account {
 type OutboxEvent struct {
 	bun.BaseModel `bun:"table:outbox_events"`
 
-	ID        int64     `bun:"id,pk"`
+	ID        int64     `bun:"id,pk,autoincrement"`
 	EventType string    `bun:"event_type"`
 	Payload   string    `bun:"payload"`
 	CreatedAt time.Time `bun:"created_at"`
@@ -74,38 +74,83 @@ func fromModelOutboxEvent(event model.OutboxEvent) *OutboxEvent {
 type Transaction struct {
 	bun.BaseModel `bun:"table:transactions"`
 
-	ID             string    `bun:"id,pk"`
-	Sender         string    `bun:"sender"`
-	Receiver       string    `bun:"receiver"`
-	Amount         float64   `bun:"amount"`
-	BlockID        string    `bun:"block_id"`
-	CreatedAt      time.Time `bun:"created_at"`
-	SenderIsOurs   bool      `bun:"sender_is_ours"`
-	ReceiverIsOurs bool      `bun:"receiver_is_ours"`
+	// Transaction identifiers
+	ID          int64  `bun:"id,pk,autoincrement"`
+	AccountAddr string `bun:"account_addr"`
+	LT          int64  `bun:"lt"`
+	PrevTxHash  string `bun:"prev_tx_hash"`
+	PrevTxLT    int64  `bun:"prev_tx_lt"`
+
+	// Address information
+	Sender   string `bun:"sender"`
+	Receiver string `bun:"receiver"`
+
+	// Financial information
+	Amount    float64 `bun:"amount"`
+	TotalFees float64 `bun:"total_fees"`
+	ExitCode  int     `bun:"exit_code"`
+	Success   bool    `bun:"success"`
+
+	// Message information
+	MessageType string `bun:"message_type"`
+	Bounce      bool   `bun:"bounce"`
+	Bounced     bool   `bun:"bounced"`
+	Body        string `bun:"body"`
+
+	// State information
+	BlockID       string    `bun:"block_id"`
+	CreatedAt     time.Time `bun:"created_at"`
+	AccountStatus string    `bun:"account_status"`
+
+	// Extra info
+	ComputeGasUsed int    `bun:"compute_gas_used"`
+	Description    string `bun:"description"`
 }
 
 func (t *Transaction) toModel() *model.Transaction {
 	return &model.Transaction{
-		AccountAddr:    t.ID,
+		AccountAddr:    t.AccountAddr,
+		LT:             t.LT,
+		PrevTxHash:     t.PrevTxHash,
+		PrevTxLT:       t.PrevTxLT,
 		Sender:         t.Sender,
 		Receiver:       t.Receiver,
 		Amount:         t.Amount,
+		TotalFees:      t.TotalFees,
+		ExitCode:       t.ExitCode,
+		Success:        t.Success,
+		MessageType:    t.MessageType,
+		Bounce:         t.Bounce,
+		Bounced:        t.Bounced,
+		Body:           t.Body,
 		BlockID:        t.BlockID,
 		CreatedAt:      t.CreatedAt,
-		SenderIsOurs:   t.SenderIsOurs,
-		ReceiverIsOurs: t.ReceiverIsOurs,
+		AccountStatus:  t.AccountStatus,
+		ComputeGasUsed: t.ComputeGasUsed,
+		Description:    t.Description,
 	}
 }
 
 func fromModelTransaction(transaction *model.Transaction) *Transaction {
 	return &Transaction{
-		ID:             transaction.AccountAddr,
+		AccountAddr:    transaction.AccountAddr,
+		LT:             transaction.LT,
+		PrevTxHash:     transaction.PrevTxHash,
+		PrevTxLT:       transaction.PrevTxLT,
 		Sender:         transaction.Sender,
 		Receiver:       transaction.Receiver,
 		Amount:         transaction.Amount,
+		TotalFees:      transaction.TotalFees,
+		ExitCode:       transaction.ExitCode,
+		Success:        transaction.Success,
+		MessageType:    transaction.MessageType,
+		Bounce:         transaction.Bounce,
+		Bounced:        transaction.Bounced,
+		Body:           transaction.Body,
 		BlockID:        transaction.BlockID,
 		CreatedAt:      transaction.CreatedAt,
-		SenderIsOurs:   transaction.SenderIsOurs,
-		ReceiverIsOurs: transaction.ReceiverIsOurs,
+		AccountStatus:  transaction.AccountStatus,
+		ComputeGasUsed: transaction.ComputeGasUsed,
+		Description:    transaction.Description,
 	}
 }

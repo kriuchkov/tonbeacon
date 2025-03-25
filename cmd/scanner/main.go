@@ -35,7 +35,8 @@ func main() {
 
 	client := liteclientutils.NewConnectionPool()
 	if err = client.AddConnectionsFromConfigUrl(ctx, cfg.Ton.URL); err != nil {
-		panic("liteclient connection")
+		log.Warn().Err(err).Msg("add connections from config")
+		os.Exit(64)
 	}
 
 	log.Info().Msg("liteclient connected")
@@ -47,7 +48,8 @@ func main() {
 
 	publisher, err := setPublisher(cfg)
 	if err != nil {
-		panic(fmt.Sprintf("set publisher: %s", err))
+		log.Warn().Err(err).Msg("set publisher")
+		os.Exit(64)
 	}
 	defer publisher.Close()
 
@@ -55,7 +57,8 @@ func main() {
 
 	resultsCh := make(chan any, 1000)
 	if err = scanner.RunAsync(ctx, resultsCh); err != nil {
-		panic(fmt.Sprintf("scanner run: %s", err))
+		log.Warn().Err(err).Msg("run scanner")
+		os.Exit(1)
 	}
 
 	if cfg.PPROF != "" {

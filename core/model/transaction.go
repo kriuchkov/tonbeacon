@@ -41,7 +41,6 @@ type Transaction struct {
 	// Extra info
 	ComputeGasUsed int    // Gas used for computation
 	Description    string // Human-readable transaction description (optional)
-
 }
 
 func UnmarshalTransaction(data []byte) (*Transaction, error) {

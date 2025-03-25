@@ -72,10 +72,11 @@ func LoadConfig() (*Config, error) {
 	v := viper.New()
 
 	// file
-	v.SetConfigName(".config.scanner2")
+	v.SetConfigName(".config.scanner")
 	v.SetConfigType("yaml")
 	v.AddConfigPath(".")
 	v.AddConfigPath("$HOME")
+	v.AddConfigPath("./.dev")
 
 	// env
 	v.SetEnvPrefix("tonbeacon")
