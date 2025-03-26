@@ -10,7 +10,7 @@ type WalletPort interface {
 	CreateWallet(ctx context.Context, walletID uint32) (model.WalletWrapper, error)
 	MasterWallet(ctx context.Context) (model.WalletWrapper, error)
 	GetExtraCurrenciesBalance(ctx context.Context, walletID uint32) ([]model.Balance, error)
-	GetBalance(ctx context.Context, walletID uint32) (uint64, error)
+	GetBalance(ctx context.Context, walletID uint32) (model.Balance, error)
 }
 
 type DatabaseWithinTransactionPort interface {

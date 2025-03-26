@@ -3,18 +3,23 @@ package ton_test
 import (
 	"context"
 	"math"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	liteclientutils "github.com/xssnick/tonutils-go/liteclient"
-	tonutils "github.com/xssnick/tonutils-go/ton"
 	walletutils "github.com/xssnick/tonutils-go/ton/wallet"
 
 	tonadapter "github.com/kriuchkov/tonbeacon/adapters/ton"
 	"github.com/kriuchkov/tonbeacon/core/consts"
+	"github.com/kriuchkov/tonbeacon/pkg/common"
 )
 
-var testConfigURL = consts.TestNetConfigURL
+var (
+	testConfigURL = consts.TestNetConfigURL
+	testSeed      = os.Getenv("TON_SEED")
+	testVersion   = walletutils.V4R2
+)
 
 type WalletManagerTestSuite struct {
 	suite.Suite
@@ -25,26 +30,18 @@ type WalletManagerTestSuite struct {
 func (suite *WalletManagerTestSuite) SetupTest() {
 	ctx := context.Background()
 
-	client := liteclientutils.NewConnectionPool()
-
-	err := client.AddConnectionsFromConfigUrl(ctx, testConfigURL)
+	liteClient, err := common.SetupLiteClient(ctx, false)
 	suite.Require().NoError(err)
 
-	seed := walletutils.NewSeed()
-	suite.Require().NotEmpty(seed)
-	suite.T().Logf("Seed phrase: %s\n", seed)
+	if testSeed == "" {
+		suite.T().Fatal("TON_SEED env variable is not set")
+	}
 
-	liteClient := tonutils.NewAPIClient(client, tonutils.ProofCheckPolicyFast).WithRetry()
-
-	masterWallet, err := walletutils.FromSeed(liteClient, seed, walletutils.ConfigV5R1Final{
-		NetworkGlobalID: walletutils.TestnetGlobalID,
-		Workchain:       0,
-	})
+	masterWallet, err := walletutils.FromSeed(liteClient, strings.Split(testSeed, " "), testVersion)
 	suite.Require().NoError(err)
 
 	suite.T().Logf("Master wallet address: %s\n", masterWallet.WalletAddress().String())
 	suite.masterWallet = masterWallet
-
 	suite.walletAdapter = tonadapter.NewWalletAdapter(liteClient, masterWallet)
 }
 
@@ -70,12 +67,7 @@ func (suite *WalletManagerTestSuite) TestWalletManager() {
 func (suite *WalletManagerTestSuite) TestGetBalance() {
 	ctx := context.Background()
 
-	subWallet, err := suite.walletAdapter.CreateWallet(ctx, 1)
-	suite.Require().NoError(err)
-
-	suite.T().Logf("Subwallet address: %s\n", subWallet.WalletAddress().String())
-
-	balance, err := suite.walletAdapter.GetExtraCurrenciesBalance(ctx, 1)
+	balance, err := suite.walletAdapter.GetBalance(ctx, 0)
 	suite.Require().NoError(err)
 
 	suite.T().Logf("Balance: %v\n", balance)

@@ -72,8 +72,8 @@ message GetBalanceRequest {
 }
 
 message Tokens {
-  int64 symbol = 1;
-  int64 amount = 2;
+  string symbol = 1;
+  string amount = 2;
 }
 
 message GetBalanceResponse {

@@ -23,7 +23,7 @@ func (s *TonBeacon) GetBalance(ctx context.Context, req *pb.GetBalanceRequest) (
 
 	var balances []*pb.Tokens
 	for _, b := range balance {
-		balances = append(balances, &pb.Tokens{Symbol: b[0].Int64(), Amount: b[1].Int64()})
+		balances = append(balances, &pb.Tokens{Symbol: b.Currency.String(), Amount: b.Amount.String()})
 	}
 	return &pb.GetBalanceResponse{Tokens: balances}, nil
 }

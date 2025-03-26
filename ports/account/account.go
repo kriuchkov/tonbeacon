@@ -91,7 +91,20 @@ func (a *Account) GetBalance(ctx context.Context, accountID string) ([]model.Bal
 			return nil, errors.Wrap(err, "get wallet id by account id")
 		}
 	}
-	return a.walletManager.GetExtraCurrenciesBalance(ctx, walletID)
+
+	var balances []model.Balance
+	balance, err := a.walletManager.GetBalance(ctx, walletID)
+	if err != nil {
+		return nil, errors.Wrap(err, "get balance")
+	}
+	balances = append(balances, balance)
+
+	extraBalance, err := a.walletManager.GetExtraCurrenciesBalance(ctx, walletID)
+	if err != nil {
+		return nil, errors.Wrap(err, "get extra balance")
+	}
+	balances = append(balances, extraBalance...)
+	return balances, nil
 }
 
 func (a *Account) CloseAccount(ctx context.Context, accountID string) error {
