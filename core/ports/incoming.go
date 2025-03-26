@@ -8,7 +8,8 @@ import (
 
 type AccountServicePort interface {
 	CreateAccount(ctx context.Context, accountID model.AccountID) (*model.Account, error)
-	GetBalance(ctx context.Context, accountID model.AccountID) (uint64, error)
+	GetBalance(ctx context.Context, accountID model.AccountID) ([]model.Balance, error)
+	MasterAccount(ctx context.Context) (*model.Account, error)
 	CloseAccount(ctx context.Context, accountID model.AccountID) error
 	ListAccounts(ctx context.Context, req model.ListAccountFilter) ([]model.Account, error)
 }

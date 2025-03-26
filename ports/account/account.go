@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
 	"github.com/kriuchkov/tonbeacon/core/model"
@@ -18,6 +19,7 @@ type Account struct {
 	walletManager ports.WalletPort
 	database      ports.DatabasePort
 	eventManager  ports.OutboxMessagePort
+	genAccountID  func() string
 }
 
 func New(options Options) *Account {
@@ -32,10 +34,15 @@ func New(options Options) *Account {
 		tx:            options.TxManager,
 		database:      options.DatabaseManager,
 		eventManager:  options.EventManager,
+		genAccountID:  uuid.NewString,
 	}
 }
 
 func (a *Account) CreateAccount(ctx context.Context, accountID string) (*model.Account, error) {
+	if accountID == "" {
+		accountID = a.genAccountID()
+	}
+
 	exists, err := a.database.IsAccountExists(ctx, accountID)
 	if err != nil || exists {
 		if err != nil {
@@ -74,8 +81,30 @@ func (a *Account) CreateAccount(ctx context.Context, accountID string) (*model.A
 	return account, nil
 }
 
-func (a *Account) GetBalance(ctx context.Context, accountID string) (uint64, error) {
-	return 0, nil
+func (a *Account) GetBalance(ctx context.Context, accountID string) ([]model.Balance, error) {
+	var walletID uint32
+	var err error
+
+	if accountID != "" && accountID != "master" {
+		walletID, err = a.database.GetWalletIDByAccountID(ctx, accountID)
+		if err != nil {
+			return nil, errors.Wrap(err, "get wallet id by account id")
+		}
+	}
+
+	var balances []model.Balance
+	balance, err := a.walletManager.GetBalance(ctx, walletID)
+	if err != nil {
+		return nil, errors.Wrap(err, "get balance")
+	}
+	balances = append(balances, balance)
+
+	extraBalance, err := a.walletManager.GetExtraCurrenciesBalance(ctx, walletID)
+	if err != nil {
+		return nil, errors.Wrap(err, "get extra balance")
+	}
+	balances = append(balances, extraBalance...)
+	return balances, nil
 }
 
 func (a *Account) CloseAccount(ctx context.Context, accountID string) error {
@@ -93,4 +122,12 @@ func (a *Account) CloseAccount(ctx context.Context, accountID string) error {
 
 func (a *Account) ListAccounts(ctx context.Context, filter model.ListAccountFilter) ([]model.Account, error) {
 	return a.database.ListAccounts(ctx, filter)
+}
+
+func (a *Account) MasterAccount(ctx context.Context) (*model.Account, error) {
+	masterWallet, err := a.walletManager.MasterWallet(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "get master wallet address")
+	}
+	return &model.Account{ID: "master", Address: masterWallet.WalletAddress(), WalletID: 0}, nil
 }

@@ -11,7 +11,6 @@ compose-up-d:
 compose-up-required:
 	docker compose up postgres flyway kafka kafka-ui topic-creator
 
-
 compose-down:
 	docker compose down
 

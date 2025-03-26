@@ -82,22 +82,22 @@ func (_c *MockWalletPort_CreateWallet_Call) RunAndReturn(run func(context.Contex
 }
 
 // GetBalance provides a mock function with given fields: ctx, walletID
-func (_m *MockWalletPort) GetBalance(ctx context.Context, walletID uint32) (uint64, error) {
+func (_m *MockWalletPort) GetBalance(ctx context.Context, walletID uint32) (model.Balance, error) {
 	ret := _m.Called(ctx, walletID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetBalance")
 	}
 
-	var r0 uint64
+	var r0 model.Balance
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint32) (uint64, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) (model.Balance, error)); ok {
 		return rf(ctx, walletID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uint32) uint64); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) model.Balance); ok {
 		r0 = rf(ctx, walletID)
 	} else {
-		r0 = ret.Get(0).(uint64)
+		r0 = ret.Get(0).(model.Balance)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
@@ -128,12 +128,12 @@ func (_c *MockWalletPort_GetBalance_Call) Run(run func(ctx context.Context, wall
 	return _c
 }
 
-func (_c *MockWalletPort_GetBalance_Call) Return(_a0 uint64, _a1 error) *MockWalletPort_GetBalance_Call {
+func (_c *MockWalletPort_GetBalance_Call) Return(_a0 model.Balance, _a1 error) *MockWalletPort_GetBalance_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockWalletPort_GetBalance_Call) RunAndReturn(run func(context.Context, uint32) (uint64, error)) *MockWalletPort_GetBalance_Call {
+func (_c *MockWalletPort_GetBalance_Call) RunAndReturn(run func(context.Context, uint32) (model.Balance, error)) *MockWalletPort_GetBalance_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -193,6 +193,64 @@ func (_c *MockWalletPort_GetExtraCurrenciesBalance_Call) Return(_a0 []model.Bala
 }
 
 func (_c *MockWalletPort_GetExtraCurrenciesBalance_Call) RunAndReturn(run func(context.Context, uint32) ([]model.Balance, error)) *MockWalletPort_GetExtraCurrenciesBalance_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// MasterWallet provides a mock function with given fields: ctx
+func (_m *MockWalletPort) MasterWallet(ctx context.Context) (model.WalletWrapper, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MasterWallet")
+	}
+
+	var r0 model.WalletWrapper
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (model.WalletWrapper, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) model.WalletWrapper); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(model.WalletWrapper)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockWalletPort_MasterWallet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MasterWallet'
+type MockWalletPort_MasterWallet_Call struct {
+	*mock.Call
+}
+
+// MasterWallet is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockWalletPort_Expecter) MasterWallet(ctx interface{}) *MockWalletPort_MasterWallet_Call {
+	return &MockWalletPort_MasterWallet_Call{Call: _e.mock.On("MasterWallet", ctx)}
+}
+
+func (_c *MockWalletPort_MasterWallet_Call) Run(run func(ctx context.Context)) *MockWalletPort_MasterWallet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockWalletPort_MasterWallet_Call) Return(_a0 model.WalletWrapper, _a1 error) *MockWalletPort_MasterWallet_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockWalletPort_MasterWallet_Call) RunAndReturn(run func(context.Context) (model.WalletWrapper, error)) *MockWalletPort_MasterWallet_Call {
 	_c.Call.Return(run)
 	return _c
 }

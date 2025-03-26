@@ -9,8 +9,10 @@ type Account struct {
 }
 
 type ListAccountFilter struct {
+	ID        *AccountID
 	WalletIDs *[]uint32
 	IsClosed  *bool
+	Address   *string
 	Offset    int
 	Limit     int
 }

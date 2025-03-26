@@ -129,22 +129,24 @@ func (_c *MockAccountServicePort_CreateAccount_Call) RunAndReturn(run func(conte
 }
 
 // GetBalance provides a mock function with given fields: ctx, accountID
-func (_m *MockAccountServicePort) GetBalance(ctx context.Context, accountID string) (uint64, error) {
+func (_m *MockAccountServicePort) GetBalance(ctx context.Context, accountID string) ([]model.Balance, error) {
 	ret := _m.Called(ctx, accountID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetBalance")
 	}
 
-	var r0 uint64
+	var r0 []model.Balance
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (uint64, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]model.Balance, error)); ok {
 		return rf(ctx, accountID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) uint64); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) []model.Balance); ok {
 		r0 = rf(ctx, accountID)
 	} else {
-		r0 = ret.Get(0).(uint64)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.Balance)
+		}
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -175,12 +177,12 @@ func (_c *MockAccountServicePort_GetBalance_Call) Run(run func(ctx context.Conte
 	return _c
 }
 
-func (_c *MockAccountServicePort_GetBalance_Call) Return(_a0 uint64, _a1 error) *MockAccountServicePort_GetBalance_Call {
+func (_c *MockAccountServicePort_GetBalance_Call) Return(_a0 []model.Balance, _a1 error) *MockAccountServicePort_GetBalance_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockAccountServicePort_GetBalance_Call) RunAndReturn(run func(context.Context, string) (uint64, error)) *MockAccountServicePort_GetBalance_Call {
+func (_c *MockAccountServicePort_GetBalance_Call) RunAndReturn(run func(context.Context, string) ([]model.Balance, error)) *MockAccountServicePort_GetBalance_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -240,6 +242,64 @@ func (_c *MockAccountServicePort_ListAccounts_Call) Return(_a0 []model.Account, 
 }
 
 func (_c *MockAccountServicePort_ListAccounts_Call) RunAndReturn(run func(context.Context, model.ListAccountFilter) ([]model.Account, error)) *MockAccountServicePort_ListAccounts_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// MasterAccount provides a mock function with given fields: ctx
+func (_m *MockAccountServicePort) MasterAccount(ctx context.Context) (*model.Account, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MasterAccount")
+	}
+
+	var r0 *model.Account
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*model.Account, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *model.Account); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Account)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAccountServicePort_MasterAccount_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MasterAccount'
+type MockAccountServicePort_MasterAccount_Call struct {
+	*mock.Call
+}
+
+// MasterAccount is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockAccountServicePort_Expecter) MasterAccount(ctx interface{}) *MockAccountServicePort_MasterAccount_Call {
+	return &MockAccountServicePort_MasterAccount_Call{Call: _e.mock.On("MasterAccount", ctx)}
+}
+
+func (_c *MockAccountServicePort_MasterAccount_Call) Run(run func(ctx context.Context)) *MockAccountServicePort_MasterAccount_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockAccountServicePort_MasterAccount_Call) Return(_a0 *model.Account, _a1 error) *MockAccountServicePort_MasterAccount_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockAccountServicePort_MasterAccount_Call) RunAndReturn(run func(context.Context) (*model.Account, error)) *MockAccountServicePort_MasterAccount_Call {
 	_c.Call.Return(run)
 	return _c
 }

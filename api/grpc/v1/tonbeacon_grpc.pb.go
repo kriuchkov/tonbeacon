@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,10 +20,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TonBeacon_CreateAccount_FullMethodName = "/tonbeacon.v1.TonBeacon/CreateAccount"
-	TonBeacon_ListAccounts_FullMethodName  = "/tonbeacon.v1.TonBeacon/ListAccounts"
-	TonBeacon_CloseAccount_FullMethodName  = "/tonbeacon.v1.TonBeacon/CloseAccount"
-	TonBeacon_GetBalance_FullMethodName    = "/tonbeacon.v1.TonBeacon/GetBalance"
+	TonBeacon_CreateAccount_FullMethodName    = "/tonbeacon.v1.TonBeacon/CreateAccount"
+	TonBeacon_GetAccount_FullMethodName       = "/tonbeacon.v1.TonBeacon/GetAccount"
+	TonBeacon_GetMasterAccount_FullMethodName = "/tonbeacon.v1.TonBeacon/GetMasterAccount"
+	TonBeacon_ListAccounts_FullMethodName     = "/tonbeacon.v1.TonBeacon/ListAccounts"
+	TonBeacon_CloseAccount_FullMethodName     = "/tonbeacon.v1.TonBeacon/CloseAccount"
+	TonBeacon_GetBalance_FullMethodName       = "/tonbeacon.v1.TonBeacon/GetBalance"
 )
 
 // TonBeaconClient is the client API for TonBeacon service.
@@ -30,6 +33,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TonBeaconClient interface {
 	CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error)
+	GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
+	GetMasterAccount(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAccountResponse, error)
 	ListAccounts(ctx context.Context, in *ListAccountsRequest, opts ...grpc.CallOption) (*ListAccountsResponse, error)
 	CloseAccount(ctx context.Context, in *CloseAccountRequest, opts ...grpc.CallOption) (*CloseAccountResponse, error)
 	GetBalance(ctx context.Context, in *GetBalanceRequest, opts ...grpc.CallOption) (*GetBalanceResponse, error)
@@ -46,6 +51,24 @@ func NewTonBeaconClient(cc grpc.ClientConnInterface) TonBeaconClient {
 func (c *tonBeaconClient) CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error) {
 	out := new(CreateAccountResponse)
 	err := c.cc.Invoke(ctx, TonBeacon_CreateAccount_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tonBeaconClient) GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error) {
+	out := new(GetAccountResponse)
+	err := c.cc.Invoke(ctx, TonBeacon_GetAccount_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tonBeaconClient) GetMasterAccount(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAccountResponse, error) {
+	out := new(GetAccountResponse)
+	err := c.cc.Invoke(ctx, TonBeacon_GetMasterAccount_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +107,8 @@ func (c *tonBeaconClient) GetBalance(ctx context.Context, in *GetBalanceRequest,
 // for forward compatibility
 type TonBeaconServer interface {
 	CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error)
+	GetAccount(context.Context, *GetAccountRequest) (*GetAccountResponse, error)
+	GetMasterAccount(context.Context, *emptypb.Empty) (*GetAccountResponse, error)
 	ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error)
 	CloseAccount(context.Context, *CloseAccountRequest) (*CloseAccountResponse, error)
 	GetBalance(context.Context, *GetBalanceRequest) (*GetBalanceResponse, error)
@@ -96,6 +121,12 @@ type UnimplementedTonBeaconServer struct {
 
 func (UnimplementedTonBeaconServer) CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAccount not implemented")
+}
+func (UnimplementedTonBeaconServer) GetAccount(context.Context, *GetAccountRequest) (*GetAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAccount not implemented")
+}
+func (UnimplementedTonBeaconServer) GetMasterAccount(context.Context, *emptypb.Empty) (*GetAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMasterAccount not implemented")
 }
 func (UnimplementedTonBeaconServer) ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAccounts not implemented")
@@ -133,6 +164,42 @@ func _TonBeacon_CreateAccount_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TonBeaconServer).CreateAccount(ctx, req.(*CreateAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TonBeacon_GetAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TonBeaconServer).GetAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TonBeacon_GetAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TonBeaconServer).GetAccount(ctx, req.(*GetAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TonBeacon_GetMasterAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TonBeaconServer).GetMasterAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TonBeacon_GetMasterAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TonBeaconServer).GetMasterAccount(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -201,6 +268,14 @@ var TonBeacon_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateAccount",
 			Handler:    _TonBeacon_CreateAccount_Handler,
+		},
+		{
+			MethodName: "GetAccount",
+			Handler:    _TonBeacon_GetAccount_Handler,
+		},
+		{
+			MethodName: "GetMasterAccount",
+			Handler:    _TonBeacon_GetMasterAccount_Handler,
 		},
 		{
 			MethodName: "ListAccounts",

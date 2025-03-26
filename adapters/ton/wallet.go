@@ -51,19 +51,22 @@ func (w *WalletAdapter) GetExtraCurrenciesBalance(ctx context.Context, walletID 
 		return nil, errors.Wrap(err, "get masterchain info")
 	}
 
-	subwallet, err := w.masterWallet.GetSubwallet(walletID)
-	if err != nil {
-		return nil, errors.Wrap(err, "get subwallet")
-	}
+	adr := w.masterWallet.WalletAddress()
+	if walletID != 0 {
+		subwallet, err := w.masterWallet.GetSubwallet(walletID)
+		if err != nil {
+			return nil, errors.Wrap(err, "get subwallet")
+		}
 
-	adr := subwallet.Address()
+		adr = subwallet.Address()
+	}
 
 	account, err := w.api.WaitForBlock(masterBlock.SeqNo).GetAccount(ctx, masterBlock, adr)
 	if err != nil {
 		return nil, errors.Wrap(err, "get account")
 	}
 
-	log.Debug().Any("account", account).Msg("account")
+	log.Debug().Any("account", account.State).Msg("account")
 
 	if account.IsActive && account.State != nil {
 		var currencies []cell.DictKV
@@ -71,39 +74,45 @@ func (w *WalletAdapter) GetExtraCurrenciesBalance(ctx context.Context, walletID 
 			return nil, errors.Wrap(err, "load currencies")
 		}
 
-		log.Debug().Any("currencies", currencies).Msg("currencies")
-
 		balances := make([]model.Balance, 0, len(currencies))
 
 		for _, kv := range currencies {
 			id := kv.Key.MustLoadBigUInt(32)
-			amount := kv.Value.MustLoadVarUInt(32)
+			amount := *kv.Value.MustLoadVarUInt(32)
 
 			log.Debug().Str("id", id.String()).Str("amount", amount.String()).Msg("balance")
-
-			balances = append(balances, model.Balance{*id, *amount})
+			balances = append(balances, model.Balance{Amount: model.Amount(amount)})
 		}
 		return balances, nil
 	}
 	return nil, nil
 }
 
-func (w *WalletAdapter) GetBalance(ctx context.Context, walletID uint32) (uint64, error) {
-	subwallet, err := w.masterWallet.GetSubwallet(walletID)
-	if err != nil {
-		return 0, errors.Wrap(err, "get subwallet")
+func (w *WalletAdapter) GetBalance(ctx context.Context, walletID uint32) (model.Balance, error) {
+	var balance model.Balance
+	var err error
+
+	var wallet *wallet.Wallet = w.masterWallet.(*wallet.Wallet)
+	if walletID != 0 {
+		wallet, err = w.masterWallet.GetSubwallet(walletID)
+		if err != nil {
+			return balance, errors.Wrap(err, "get subwallet")
+		}
 	}
 
 	masterBlock, err := w.api.CurrentMasterchainInfo(ctx)
 	if err != nil {
-		return 0, errors.Wrap(err, "get masterchain info")
+		return balance, errors.Wrap(err, "get masterchain info")
 	}
 
-	balance, err := subwallet.GetBalance(ctx, masterBlock)
+	balanceTon, err := wallet.GetBalance(ctx, masterBlock)
 	if err != nil {
-		return 0, errors.Wrap(err, "get balance")
+		return balance, errors.Wrap(err, "get balance")
 	}
-	return balance.Nano().Uint64(), nil
+	amount := *balanceTon.Nano()
+	balance = model.Balance{Currency: model.CurrencyTON, Amount: model.Amount(amount)}
+
+	return balance, nil
 }
 
 func (w *WalletAdapter) SendWaitTransaction(ctx context.Context, walletID uint32) error {
@@ -160,4 +169,8 @@ func (w *WalletAdapter) TransferToMainWallet(ctx context.Context, walletID uint3
 		Msg("transferring funds to main wallet")
 
 	return nil
+}
+
+func (w *WalletAdapter) MasterWallet(_ context.Context) (model.WalletWrapper, error) {
+	return &TonWallet{Address: model.Address(w.masterWallet.WalletAddress().String())}, nil
 }

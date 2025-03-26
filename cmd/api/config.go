@@ -36,10 +36,11 @@ func (dc *DatabaseConfig) DSN() string {
 }
 
 type Config struct {
-	LogLevel string         `mapstructure:"log_level"`
-	GRPCPort string         `mapstructure:"grpc_port"`
-	Master   MasterKey      `mapstructure:"master"`
-	Database DatabaseConfig `mapstructure:"database"`
+	LogLevel  string         `mapstructure:"log_level"`
+	GRPCPort  string         `mapstructure:"grpc_port"`
+	IsMainnet bool           `mapstructure:"is_mainnet"`
+	Master    MasterKey      `mapstructure:"master"`
+	Database  DatabaseConfig `mapstructure:"database"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -49,6 +50,7 @@ func LoadConfig() (*Config, error) {
 	v.SetConfigType("yaml")
 	v.AddConfigPath(".")
 	v.AddConfigPath("$HOME")
+	v.AddConfigPath("./.dev")
 
 	if err := v.ReadInConfig(); err != nil {
 		return nil, errors.Wrap(err, "read config")

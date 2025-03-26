@@ -4,8 +4,12 @@ package tonbeacon.v1;
 
 option go_package = "./proto";
 
+import "google/protobuf/empty.proto";
+
 service TonBeacon {
   rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse) {}
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {}
+  rpc GetMasterAccount(google.protobuf.Empty) returns (GetAccountResponse) {}
   rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse) {}
   rpc CloseAccount(CloseAccountRequest) returns (CloseAccountResponse) {}
   rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse) {}
@@ -39,14 +43,6 @@ message CloseAccountResponse {
   Error error = 1;
 }
 
-message GetBalanceRequest {
-  string account_id = 1;
-}
-
-message GetBalanceResponse {
-  Error error = 1;
-  int64 balance = 2;
-}
 
 message ListAccountsRequest {
   repeated uint32 wallet_ids = 1;
@@ -67,4 +63,32 @@ message PageInfo {
   uint32 offset = 2;
   uint32 limit = 3;
   bool has_more = 4;
+}
+
+
+// Balance
+message GetBalanceRequest {
+  string account_id = 1;
+}
+
+message Tokens {
+  string symbol = 1;
+  string amount = 2;
+}
+
+message GetBalanceResponse {
+  Error error = 1;
+  repeated Tokens tokens = 2;
+}
+
+// GetAccount
+message GetAccountRequest {
+  optional string account_id = 1;
+  optional string address = 2;
+  optional uint32 wallet_id = 3;
+}
+
+message GetAccountResponse {
+  Error error = 1;
+  Account account = 2;
 }

@@ -13,14 +13,6 @@ import (
 
 var _ model.WalletWrapper = (*TestWalletWrapper)(nil)
 
-type TestWalletWrapper struct {
-	address model.Address
-}
-
-func (t *TestWalletWrapper) WalletAddress() model.Address {
-	return t.address
-}
-
 func TestAccount_CreateAccount(t *testing.T) {
 	type isAccountExistsMock struct {
 		callCount     int
@@ -162,4 +154,16 @@ func TestAccount_CreateAccount(t *testing.T) {
 			mockEM.AssertExpectations(t)
 		})
 	}
+}
+
+type TestWalletWrapper struct {
+	address model.Address
+}
+
+func (t *TestWalletWrapper) WalletAddress() model.Address {
+	return t.address
+}
+
+func (t *TestWalletWrapper) ToAccount() *model.Account {
+	return &model.Account{Address: t.address}
 }
