@@ -11,13 +11,12 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
-	liteclientutils "github.com/xssnick/tonutils-go/liteclient"
-	tonutils "github.com/xssnick/tonutils-go/ton"
 	walletutils "github.com/xssnick/tonutils-go/ton/wallet"
 
 	"github.com/kriuchkov/tonbeacon/adapters/grpc"
 	"github.com/kriuchkov/tonbeacon/adapters/repository"
 	"github.com/kriuchkov/tonbeacon/adapters/ton"
+	"github.com/kriuchkov/tonbeacon/pkg/common"
 	"github.com/kriuchkov/tonbeacon/ports/account"
 )
 
@@ -39,14 +38,11 @@ func main() {
 
 	repositoryAdapter := repository.New(db)
 
-	client := liteclientutils.NewConnectionPool()
-
-	if err = client.AddConnectionsFromConfigUrl(ctx, "https://tonutils.com/testnet-global.config.json"); err != nil {
-		log.Panic().Err(err).Msg("liteclient connection")
+	liteClient, err := common.SetupLiteClient(ctx, cfg.IsMainnet)
+	if err != nil {
+		log.Warn().Err(err).Msg("lite client setup")
+		os.Exit(1)
 	}
-
-	liteClient := tonutils.NewAPIClient(client, tonutils.ProofCheckPolicySecure)
-	log.Info().Msg("liteclient connected")
 
 	masterWallet, err := walletutils.FromSeed(liteClient, cfg.Master.GetSeed(), cfg.Master.Version)
 	if err != nil {

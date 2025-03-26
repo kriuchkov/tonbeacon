@@ -51,12 +51,15 @@ func (w *WalletAdapter) GetExtraCurrenciesBalance(ctx context.Context, walletID 
 		return nil, errors.Wrap(err, "get masterchain info")
 	}
 
-	subwallet, err := w.masterWallet.GetSubwallet(walletID)
-	if err != nil {
-		return nil, errors.Wrap(err, "get subwallet")
-	}
+	adr := w.masterWallet.WalletAddress()
+	if walletID != 0 {
+		subwallet, err := w.masterWallet.GetSubwallet(walletID)
+		if err != nil {
+			return nil, errors.Wrap(err, "get subwallet")
+		}
 
-	adr := subwallet.Address()
+		adr = subwallet.Address()
+	}
 
 	account, err := w.api.WaitForBlock(masterBlock.SeqNo).GetAccount(ctx, masterBlock, adr)
 	if err != nil {
@@ -160,4 +163,8 @@ func (w *WalletAdapter) TransferToMainWallet(ctx context.Context, walletID uint3
 		Msg("transferring funds to main wallet")
 
 	return nil
+}
+
+func (w *WalletAdapter) MasterWallet(_ context.Context) (model.WalletWrapper, error) {
+	return &TonWallet{Address: model.Address(w.masterWallet.WalletAddress().String())}, nil
 }

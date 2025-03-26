@@ -81,3 +81,14 @@ func (d *DatabaseAdapter) ListAccounts(ctx context.Context, filter model.ListAcc
 	}
 	return result, nil
 }
+
+func (d *DatabaseAdapter) GetWalletIDByAccountID(ctx context.Context, accountID string) (uint32, error) {
+	idb := d.GetTxOrConn(ctx)
+
+	var walletID uint32
+	err := idb.NewSelect().ColumnExpr("wallet_id").Model((*Account)(nil)).Where("id = ?", accountID).Scan(ctx, &walletID)
+	if err != nil {
+		return 0, errors.Wrap(err, "get wallet id by account id")
+	}
+	return walletID, nil
+}

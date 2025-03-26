@@ -8,6 +8,7 @@ import (
 
 type WalletPort interface {
 	CreateWallet(ctx context.Context, walletID uint32) (model.WalletWrapper, error)
+	MasterWallet(ctx context.Context) (model.WalletWrapper, error)
 	GetExtraCurrenciesBalance(ctx context.Context, walletID uint32) ([]model.Balance, error)
 	GetBalance(ctx context.Context, walletID uint32) (uint64, error)
 }
@@ -39,6 +40,7 @@ type (
 		InsertAccount(ctx context.Context, accountID string) (*model.Account, error)
 		UpdateAccount(ctx context.Context, account *model.Account) error
 		CloseAccount(ctx context.Context, accountID string) error
+		GetWalletIDByAccountID(ctx context.Context, accountID string) (uint32, error)
 		ListAccounts(ctx context.Context, filter model.ListAccountFilter) ([]model.Account, error)
 	}
 

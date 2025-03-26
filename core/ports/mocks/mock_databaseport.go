@@ -128,6 +128,63 @@ func (_c *MockDatabasePort_GetEvents_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// GetWalletIDByAccountID provides a mock function with given fields: ctx, accountID
+func (_m *MockDatabasePort) GetWalletIDByAccountID(ctx context.Context, accountID string) (uint32, error) {
+	ret := _m.Called(ctx, accountID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetWalletIDByAccountID")
+	}
+
+	var r0 uint32
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (uint32, error)); ok {
+		return rf(ctx, accountID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) uint32); ok {
+		r0 = rf(ctx, accountID)
+	} else {
+		r0 = ret.Get(0).(uint32)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, accountID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockDatabasePort_GetWalletIDByAccountID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWalletIDByAccountID'
+type MockDatabasePort_GetWalletIDByAccountID_Call struct {
+	*mock.Call
+}
+
+// GetWalletIDByAccountID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - accountID string
+func (_e *MockDatabasePort_Expecter) GetWalletIDByAccountID(ctx interface{}, accountID interface{}) *MockDatabasePort_GetWalletIDByAccountID_Call {
+	return &MockDatabasePort_GetWalletIDByAccountID_Call{Call: _e.mock.On("GetWalletIDByAccountID", ctx, accountID)}
+}
+
+func (_c *MockDatabasePort_GetWalletIDByAccountID_Call) Run(run func(ctx context.Context, accountID string)) *MockDatabasePort_GetWalletIDByAccountID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockDatabasePort_GetWalletIDByAccountID_Call) Return(_a0 uint32, _a1 error) *MockDatabasePort_GetWalletIDByAccountID_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockDatabasePort_GetWalletIDByAccountID_Call) RunAndReturn(run func(context.Context, string) (uint32, error)) *MockDatabasePort_GetWalletIDByAccountID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // InsertAccount provides a mock function with given fields: ctx, accountID
 func (_m *MockDatabasePort) InsertAccount(ctx context.Context, accountID string) (*model.Account, error) {
 	ret := _m.Called(ctx, accountID)

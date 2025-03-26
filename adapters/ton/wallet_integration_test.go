@@ -11,9 +11,10 @@ import (
 	walletutils "github.com/xssnick/tonutils-go/ton/wallet"
 
 	tonadapter "github.com/kriuchkov/tonbeacon/adapters/ton"
+	"github.com/kriuchkov/tonbeacon/core/consts"
 )
 
-var testConfigURL = "https://tonutils.com/testnet-global.config.json"
+var testConfigURL = consts.TestNetConfigURL
 
 type WalletManagerTestSuite struct {
 	suite.Suite
@@ -74,7 +75,7 @@ func (suite *WalletManagerTestSuite) TestGetBalance() {
 
 	suite.T().Logf("Subwallet address: %s\n", subWallet.WalletAddress().String())
 
-	balance, err := suite.walletAdapter.GetBalance(ctx, 1)
+	balance, err := suite.walletAdapter.GetExtraCurrenciesBalance(ctx, 1)
 	suite.Require().NoError(err)
 
 	suite.T().Logf("Balance: %v\n", balance)

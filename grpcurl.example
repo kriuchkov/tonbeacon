@@ -1,0 +1,9 @@
+# Create a subwallet
+grpcurl -plaintext -d '' localhost:9090 tonbeacon.v1.TonBeacon.CreateAccount
+
+
+#
+grpcurl -plaintext -d '{"account_id": "76272738-b028-477f-bd1c-be220922a816"}' localhost:9090 tonbeacon.v1.TonBeacon.GetBalance
+
+# GetMasterAccount
+grpcurl -plaintext -d '' localhost:9090 tonbeacon.v1.TonBeacon.GetMasterAccount

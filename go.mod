@@ -4,11 +4,12 @@ go 1.24.0
 
 require (
 	github.com/IBM/sarama v1.45.1
+	github.com/docker/docker v27.1.1+incompatible
 	github.com/go-faster/errors v0.7.1
 	github.com/go-playground/validator/v10 v10.25.0
+	github.com/google/uuid v1.6.0
 	github.com/rs/zerolog v1.33.0
 	github.com/samber/lo v1.49.1
-	github.com/segmentio/kafka-go v0.4.47
 	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.19.0
@@ -20,9 +21,9 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.2.10
 	github.com/valyala/fastjson v1.6.4
 	github.com/xssnick/tonutils-go v1.11.1
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.12.0
 	google.golang.org/grpc v1.70.0
-	google.golang.org/protobuf v1.36.5
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
@@ -36,7 +37,6 @@ require (
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/docker v27.1.1+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/eapache/go-resiliency v1.7.0 // indirect
@@ -53,7 +53,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect

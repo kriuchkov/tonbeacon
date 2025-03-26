@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/rs/zerolog/log"
-	"github.com/samber/lo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
@@ -37,7 +36,7 @@ func (s *TonBeacon) Stop() {
 }
 
 func (s *TonBeacon) CreateAccount(ctx context.Context, req *pb.CreateAccountRequest) (*pb.CreateAccountResponse, error) {
-	log.Info().Str("account_id", req.GetAccountId()).Msg("create account")
+	log.Debug().Str("account_id", req.GetAccountId()).Msg("create account")
 
 	account, err := s.accountSvc.CreateAccount(ctx, req.GetAccountId())
 	if err != nil {
@@ -74,61 +73,4 @@ func (s *TonBeacon) CloseAccount(ctx context.Context, req *pb.CloseAccountReques
 
 func closeAccountPbError(code codes.Code, err error) *pb.CloseAccountResponse {
 	return &pb.CloseAccountResponse{Error: &pb.Error{Code: uint32(code), Message: err.Error()}}
-}
-
-func (s *TonBeacon) GetBalance(ctx context.Context, req *pb.GetBalanceRequest) (*pb.GetBalanceResponse, error) {
-	balance, err := s.accountSvc.GetBalance(ctx, req.GetAccountId())
-	if err != nil {
-		if errors.Is(err, model.ErrAccountNotFound) {
-			return getBalancePbError(codes.NotFound, err), nil
-		}
-		return getBalancePbError(codes.Internal, errors.Wrap(err, "get balance")), nil
-	}
-
-	return &pb.GetBalanceResponse{Balance: int64(balance)}, nil
-}
-
-func getBalancePbError(code codes.Code, err error) *pb.GetBalanceResponse {
-	return &pb.GetBalanceResponse{Error: &pb.Error{Code: uint32(code), Message: err.Error()}}
-}
-
-func (s *TonBeacon) ListAccounts(ctx context.Context, req *pb.ListAccountsRequest) (*pb.ListAccountsResponse, error) {
-	log.Debug().Msg("list accounts")
-
-	var filter model.ListAccountFilter
-	if len(req.GetWalletIds()) > 0 {
-		filter.WalletIDs = lo.ToPtr(req.GetWalletIds())
-	}
-
-	if req.IsActive != nil {
-		filter.IsClosed = lo.ToPtr(false)
-	}
-
-	filter.Offset = int(req.GetOffset())
-
-	if req.GetLimit() == 0 || req.GetLimit() > 1000 {
-		req.Limit = 1000
-	}
-	filter.Limit = int(req.GetLimit())
-
-	accounts, err := s.accountSvc.ListAccounts(ctx, filter)
-	if err != nil {
-		return listAccountsPbError(codes.Internal, errors.Wrap(err, "list accounts")), nil
-	}
-
-	pbAccounts := make([]*pb.Account, 0, len(accounts))
-	for _, account := range accounts {
-		pbAccount := pb.Account{
-			AccountId: account.ID,
-			WalletId:  account.WalletID,
-			Address:   account.Address.String(),
-		}
-		pbAccounts = append(pbAccounts, &pbAccount)
-	}
-
-	return &pb.ListAccountsResponse{Accounts: pbAccounts}, nil
-}
-
-func listAccountsPbError(code codes.Code, err error) *pb.ListAccountsResponse {
-	return &pb.ListAccountsResponse{Error: &pb.Error{Code: uint32(code), Message: err.Error()}}
 }
