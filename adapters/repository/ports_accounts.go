@@ -69,6 +69,14 @@ func (d *DatabaseAdapter) ListAccounts(ctx context.Context, filter model.ListAcc
 		query.Where("wallet_id IN (?)", *filter.WalletIDs)
 	}
 
+	if filter.ID != nil {
+		query.Where("id = ?", *filter.ID)
+	}
+
+	if filter.Address != nil {
+		query.Where("ton_address = ?", filter.Address)
+	}
+
 	query.Offset(filter.Offset).Limit(filter.Limit)
 
 	if err := query.Scan(ctx); err != nil {
